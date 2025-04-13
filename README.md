@@ -5,7 +5,7 @@ It uses several unused Emerald flags, vars, and FR/LG tracks to make things work
 
 More specifically, this adds 4 pinball mini-games, Flappy Bird, Block Stacker, Snake, Blackjack, Voltorb Flip, Plinko, Mauville Derby, and Gacha Machines into the Game Corner.
 
-IF YOU'RE PLANNING TO USE THIS FOR EMERALD EXPANSION... GACHA IS NOT SET UP FOR THE EXPANDED DEX; IT WAS BUILT FOR THE BASE POKEEMERALD DEX DATA.
+THIS IS CURRENTLY NOT COMPATIBLE WITH EMERALD EXPANSION!
 
 Big thank you to huderlem (Pokemon Pinball to Emerald), and Pokeabbie (Voltorb Flip from Emerald Rogue). All I really did for these was some graphics, music, and code to work with coins. They deserve the real credits here.
 Also thank you to Viperio, who made an initial Snake for Pokemon Emerald that I based my code on.
