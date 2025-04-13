@@ -904,8 +904,8 @@
     {
       "id": "LAYOUT_MAUVILLE_CITY_GAME_CORNER",
       "name": "MauvilleCity_GameCorner_Layout",
-      "width": 22,
-      "height": 11,
+      "width": 30,
+      "height": 22,
       "primary_tileset": "gTileset_Building",
       "secondary_tileset": "gTileset_MauvilleGameCorner",
       "border_filepath": "data/layouts/MauvilleCity_GameCorner/border.bin",

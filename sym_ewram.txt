@@ -149,3 +149,12 @@
 	.include "src/faraway_island.o"
 	.include "src/trainer_hill.o"
 	.include "src/rayquaza_scene.o"
+	.include "src/game_corner_gacha.o"
+	.include "src/rogue_voltorbflip.o"
+	.include "src/pinball.o"
+	.include "src/pachinko.o"
+	.include "src/block_stacker.o"
+	.include "src/derby.o"
+	.include "src/snake.o"
+	.include "src/flappybird.o"
+	

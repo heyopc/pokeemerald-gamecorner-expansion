@@ -340,6 +340,14 @@ SECTIONS {
         src/gym_leader_rematch.o(.text);
         src/battle_transition_frontier.o(.text);
         src/international_string_util.o(.text);
+        src/game_corner_gacha.o(.text);
+		src/rogue_voltorbflip.o(.text);
+		src/pinball.o(.text);
+		src/pachinko.o(.text);
+		src/block_stacker.o(.text);
+		src/derby.o(.text);
+		src/snake.o(.text);
+		src/flappybird.o(.text);
     } > ROM =0
 
     script_data :
@@ -702,6 +710,14 @@ SECTIONS {
         data/mystery_gift.o(.rodata);
         src/m4a_tables.o(.rodata);
         data/sound_data.o(.rodata);
+        src/game_corner_gacha.o(.rodata);
+		src/rogue_voltorbflip.o(.rodata);
+		src/pinball.o(.rodata);
+		src/pachinko.o(.rodata);
+		src/block_stacker.o(.rodata);
+		src/derby.o(.rodata);
+		src/snake.o(.rodata);
+		src/flappybird.o(.rodata);
     } > ROM =0
 
     song_data :

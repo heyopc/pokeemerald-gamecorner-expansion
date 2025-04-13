@@ -114,6 +114,8 @@ struct OamData
 #define SPRITE_SIZE_16x32   ((ST_OAM_SIZE_2 << 2) | (ST_OAM_V_RECTANGLE))
 #define SPRITE_SIZE_32x64   ((ST_OAM_SIZE_3 << 2) | (ST_OAM_V_RECTANGLE))
 
+#define SPRITE_SIZE_64x16   ((ST_OAM_SIZE_3 << 2) | (ST_OAM_H_RECTANGLE))
+
 #define SPRITE_SIZE(dim)  ((SPRITE_SIZE_##dim >> 2) & 0x03)
 #define SPRITE_SHAPE(dim) (SPRITE_SIZE_##dim & 0x03)
 

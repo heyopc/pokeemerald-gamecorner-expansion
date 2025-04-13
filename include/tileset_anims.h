@@ -29,6 +29,7 @@ void InitTilesetAnim_Underwater(void);
 void InitTilesetAnim_SootopolisGym(void);
 void InitTilesetAnim_MauvilleGym(void);
 void InitTilesetAnim_EliteFour(void);
+void InitTilesetAnim_MauvilleGameCorner(void);
 void InitTilesetAnim_BattleDome(void);
 void InitTilesetAnim_BattlePyramid(void);
 

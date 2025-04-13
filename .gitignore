@@ -17,6 +17,7 @@
 *.latfont
 *.hwjpnfont
 *.fwjpnfont
+*.Identifier
 sound/**/*.bin
 sound/songs/midi/*.s
 tools/agbcc
