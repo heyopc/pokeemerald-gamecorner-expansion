@@ -206,19 +206,19 @@ static const u16 Derby_Race_Pal[] = INCBIN_U16("graphics/derby/racetrack_bg.gbap
 
 // Betting Menu Pokemon Sprites and Palettes
 
-static const u32 PonytaGFX[] = INCBIN_U32("graphics/pokemon/ponyta/front.4bpp.lz");
+static const u32 PonytaGFX[] = INCBIN_U32("graphics/pokemon/ponyta/anim_front.4bpp.lz");
 static const u16 PonytaNormalPAL[] = INCBIN_U16("graphics/pokemon/ponyta/normal.gbapal");
 static const u16 PonytaShinyPAL[] = INCBIN_U16("graphics/pokemon/ponyta/shiny.gbapal");
 
-static const u32 RapidashGFX[] = INCBIN_U32("graphics/pokemon/rapidash/front.4bpp.lz");
+static const u32 RapidashGFX[] = INCBIN_U32("graphics/pokemon/rapidash/anim_front.4bpp.lz");
 static const u16 RapidashNormalPAL[] = INCBIN_U16("graphics/pokemon/rapidash/normal.gbapal");
 static const u16 RapidashShinyPAL[] = INCBIN_U16("graphics/pokemon/rapidash/shiny.gbapal");
 
-static const u32 RattataGFX[] = INCBIN_U32("graphics/pokemon/rattata/front.4bpp.lz");
+static const u32 RattataGFX[] = INCBIN_U32("graphics/pokemon/rattata/anim_front.4bpp.lz");
 static const u16 RattataNormalPAL[] = INCBIN_U16("graphics/pokemon/rattata/normal.gbapal");
 static const u16 RattataShinyPAL[] = INCBIN_U16("graphics/pokemon/rattata/shiny.gbapal");
 
-static const u32 FeebasGFX[] = INCBIN_U32("graphics/pokemon/feebas/front.4bpp.lz");
+static const u32 FeebasGFX[] = INCBIN_U32("graphics/pokemon/feebas/anim_front.4bpp.lz");
 static const u16 FeebasNormalPAL[] = INCBIN_U16("graphics/pokemon/feebas/normal.gbapal");
 static const u16 FeebasShinyPAL[] = INCBIN_U16("graphics/pokemon/feebas/shiny.gbapal");
 

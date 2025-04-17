@@ -2,6 +2,7 @@ ENTRY(Start)
 
 gNumMusicPlayers = 4;
 gMaxLines = 0;
+gInitialMainCB2 = CB2_InitCopyrightScreenAfterBootup;
 
 MEMORY
 {
@@ -12,13 +13,32 @@ MEMORY
 
 SECTIONS {
 
-    ewram 0x2000000 (NOLOAD) :
+
+    .ewram ORIGIN(EWRAM) : AT (__ewram_lma)
     ALIGN(4)
     {
-        src/*.o(ewram_data);
+        __ewram_start = .;
+        *(.ewram*)
+        . = ALIGN(4);
+        __ewram_end = .;
     } > EWRAM
 
-    iwram 0x3000000 (NOLOAD) :
+    .ewram.sbss (NOLOAD) :
+    ALIGN(4)
+    {
+        src/*.o(.sbss);
+    } > EWRAM
+
+    .iwram ORIGIN(IWRAM) : AT (__iwram_lma)
+    ALIGN(4)
+    {
+        __iwram_start = .;
+        *(.iwram*);
+        . = ALIGN(4);
+        __iwram_end = .;
+    } > IWRAM
+
+    .iwram.bss (NOLOAD) :
     ALIGN(4)
     {
         src/*.o(.bss);
@@ -35,13 +55,13 @@ SECTIONS {
     } > IWRAM
 
     /* BEGIN ROM DATA */
-    . = 0x8000000;
 
-    .text :
+    .text ORIGIN(ROM) :
     ALIGN(4)
     {
         src/rom_header.o(.text*);
         src/rom_header_gf.o(.text.*);
+        src/rom_header_rhh.o(.text.*);
         src/crt0.o(.text);
         src/main.o(.text);
         src/*.o(.text*);
@@ -103,7 +123,7 @@ SECTIONS {
         *libc.a:*.o(.rodata*);
         *libc.a:*.o(.data*);
         src/libisagbprn.o(.rodata);
-    } =0
+    } > ROM =0
 
     multiboot_data :
     ALIGN(4)
@@ -113,17 +133,27 @@ SECTIONS {
         data/multiboot_pokemon_colosseum.o(.rodata);
     } > ROM =0
 
-    anim_mon_front_pic_data :
-    ALIGN(4)
-    {
-        src/anim_mon_front_pics.o(.rodata);
-    } > ROM =0
-
     gfx_data :
     ALIGN(4)
     {
         src/graphics.o(.rodata);
     } > ROM =0
+
+    .data.iwram :
+    ALIGN(4)
+    {
+        __iwram_lma = .;
+        . = . + (__iwram_end - __iwram_start);
+    } > ROM = 0
+
+    .data.ewram :
+    ALIGN(4)
+    {
+        __ewram_lma = .;
+        . = . + (__ewram_end - __ewram_start);
+    } > ROM = 0
+
+    __rom_end = .;
 
     /* DWARF debug sections.
        Symbols in the DWARF debugging sections are relative to the beginning

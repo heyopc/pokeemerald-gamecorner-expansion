@@ -35,6 +35,7 @@ bool8 FldEff_UseStrength(void);
 // sweet scent
 bool8 SetUpFieldMove_SweetScent(void);
 bool8 FldEff_SweetScent(void);
+void StartSweetScentFieldEffect(void);
 
 // teleport
 bool8 SetUpFieldMove_Teleport(void);
@@ -45,7 +46,7 @@ bool8 SetUpFieldMove_Dig(void);
 bool8 FldEff_UseDig(void);
 
 // rock smash
-bool8 CheckObjectGraphicsInFrontOfPlayer(u8 graphicsId);
+bool8 CheckObjectGraphicsInFrontOfPlayer(u16 graphicsId);
 u8 CreateFieldMoveTask(void);
 bool8 SetUpFieldMove_RockSmash(void);
 bool8 FldEff_UseRockSmash(void);

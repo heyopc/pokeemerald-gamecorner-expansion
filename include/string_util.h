@@ -21,6 +21,7 @@ u8 *StringAppend(u8 *dest, const u8 *src);
 u8 *StringCopyN(u8 *dest, const u8 *src, u8 n);
 u8 *StringAppendN(u8 *dest, const u8 *src, u8 n);
 u16 StringLength(const u8 *str);
+u16 StringLineLength(const u8 *str);
 s32 StringCompare(const u8 *str1, const u8 *str2);
 s32 StringCompareN(const u8 *str1, const u8 *str2, u32 n);
 bool8 IsStringLengthAtLeast(const u8 *str, s32 n);
@@ -42,5 +43,6 @@ u8 GetExtCtrlCodeLength(u8 code);
 s32 StringCompareWithoutExtCtrlCodes(const u8 *str1, const u8 *str2);
 void ConvertInternationalString(u8 *s, u8 language);
 void StripExtCtrlCodes(u8 *str);
+u8 *StringCopyUppercase(u8 *dest, const u8 *src);
 
 #endif // GUARD_STRING_UTIL_H

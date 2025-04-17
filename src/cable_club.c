@@ -445,13 +445,13 @@ bool32 AreBattleTowerLinkSpeciesSame(u16 *speciesList1, u16 *speciesList2)
             {
                 if (numSameSpecies == 0)
                 {
-                    StringCopy(gStringVar1, gSpeciesNames[speciesList1[i]]);
+                    StringCopy(gStringVar1, GetSpeciesName(speciesList1[i]));
                     haveSameSpecies = TRUE;
                 }
 
                 if (numSameSpecies == 1)
                 {
-                    StringCopy(gStringVar2, gSpeciesNames[speciesList1[i]]);
+                    StringCopy(gStringVar2, GetSpeciesName(speciesList1[i]));
                     haveSameSpecies = TRUE;
                 }
 
@@ -867,7 +867,7 @@ static void Task_StartWiredCableClubBattle(u8 taskId)
 
         SetLinkBattleTypeFlags(gSpecialVar_0x8004);
         CleanupOverworldWindowsAndTilemaps();
-        gTrainerBattleOpponent_A = TRAINER_LINK_OPPONENT;
+        TRAINER_BATTLE_PARAM.opponentA = TRAINER_LINK_OPPONENT;
         SetMainCallback2(CB2_InitBattle);
         gMain.savedCallback = CB2_ReturnFromCableClubBattle;
         DestroyTask(taskId);
@@ -933,7 +933,7 @@ static void Task_StartWirelessCableClubBattle(u8 taskId)
         gLinkPlayers[0].linkType = LINKTYPE_BATTLE;
         SetLinkBattleTypeFlags(gSpecialVar_0x8004);
         CleanupOverworldWindowsAndTilemaps();
-        gTrainerBattleOpponent_A = TRAINER_LINK_OPPONENT;
+        TRAINER_BATTLE_PARAM.opponentA = TRAINER_LINK_OPPONENT;
         SetMainCallback2(CB2_InitBattle);
         gMain.savedCallback = CB2_ReturnFromCableClubBattle;
         DestroyTask(taskId);
