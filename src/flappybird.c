@@ -861,11 +861,7 @@ static void CreateCreditSprites(void)
     for (i = 0; i < ARRAY_COUNT(sSpriteSheets_CreditsInterface) - 1; i++)  
     {
         struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheets_CreditsInterface[i].data, gDecompressionBuffer);
-        s.data = gDecompressionBuffer;
-        s.size = sSpriteSheets_CreditsInterface[i].size;
-        s.tag = sSpriteSheets_CreditsInterface[i].tag;
-        LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheets_CreditsInterface[i]);
     }
 
     for (i = 0; i < 4; i++)
@@ -913,11 +909,7 @@ static void CreateHiScoreSprites(void)
     for (i = 0; i < ARRAY_COUNT(sSpriteSheets_CreditsInterface) - 1; i++)  
     {
         struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheets_CreditsInterface[i].data, gDecompressionBuffer);
-        s.data = gDecompressionBuffer;
-        s.size = sSpriteSheets_CreditsInterface[i].size;
-        s.tag = sSpriteSheets_CreditsInterface[i].tag;
-        LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheets_CreditsInterface[i]);
     }
 
     for (i = 0; i < 4; i++)
@@ -932,11 +924,7 @@ static void CreateScore(void)
 	struct SpriteSheet s;
 	
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Score.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Score.size;
-		s.tag = SCORE_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Score);
 	
 	sFlappy->ScoreSpriteId = CreateSprite(&sSpriteTemplate_Score, 80, 138, 0); 
 }
@@ -946,11 +934,7 @@ static void CreateScore2(void)
 	struct SpriteSheet s;
 	
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Score2.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Score2.size;
-		s.tag = SCORE2_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Score2);
 	
 	sFlappy->Score2SpriteId = CreateSprite(&sSpriteTemplate_Score2, 160, 138, 0); 
 }
@@ -960,11 +944,7 @@ static void CreateFlap(void)
 	struct SpriteSheet s;
 	
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Flap.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Flap.size;
-		s.tag = FLAP_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Flap);
 	
 	sFlappy->FlapSpriteId = CreateSprite(&sSpriteTemplate_Flap, 204, 20, 0); 
 }
@@ -974,11 +954,7 @@ static void CreateOne(void)
 	struct SpriteSheet s;
 	
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_One.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_One.size;
-		s.tag = ONE_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_One);
 	
 	sFlappy->OneSpriteId = CreateSprite(&sSpriteTemplate_One, 120, 80, 0); 
 }
@@ -988,11 +964,7 @@ static void CreateTwo(void)
 	struct SpriteSheet s;
 	
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Two.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Two.size;
-		s.tag = TWO_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Two);
 	
 	sFlappy->TwoSpriteId = CreateSprite(&sSpriteTemplate_Two, 120, 80, 0); 
 }
@@ -1002,11 +974,7 @@ static void CreateThree(void)
 	struct SpriteSheet s;
 	
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Three.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Three.size;
-		s.tag = THREE_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Three);
 	
 	sFlappy->ThreeSpriteId = CreateSprite(&sSpriteTemplate_Three, 120, 80, 0); 
 }
@@ -1016,11 +984,7 @@ static void CreateStart(void)
 	struct SpriteSheet s;
 	
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Start.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Start.size;
-		s.tag = START_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Start);
 	
 	sFlappy->StartSpriteId = CreateSprite(&sSpriteTemplate_Start, 120, 80, 0); 
 }
@@ -1030,11 +994,7 @@ static void CreateHiScore(void)
 	struct SpriteSheet s;
 	
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_HiScore.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_HiScore.size;
-		s.tag = HISCORE_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_HiScore);
 	
 	sFlappy->HiScoreSpriteId = CreateSprite(&sSpriteTemplate_HiScore, 120, 80, 0); 
 }
@@ -1044,11 +1004,7 @@ static void CreateGameOver(void)
 	struct SpriteSheet s;
 	
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_GameOver.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_GameOver.size;
-		s.tag = GAMEOVER_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_GameOver);
 	
 	sFlappy->GameOverSpriteId = CreateSprite(&sSpriteTemplate_GameOver, 120, 80, 0); 
 }
@@ -1056,11 +1012,7 @@ static void CreateGameOver(void)
 static void CreateHitbox(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Butterfree_Hitbox.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Butterfree_Hitbox.size;
-		s.tag = BUTTERFREE_HITBOX_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Butterfree_Hitbox);
 	
 	sFlappy->ButterfreeHitboxSpriteId = CreateSprite(&sSpriteTemplate_Butterfree_Hitbox, 40, 64, 0);
 }
@@ -1068,11 +1020,7 @@ static void CreateHitbox(void)
 static void CreateBorder(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Border.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Border.size;
-		s.tag = BORDER_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Border);
 	
 	sFlappy->BorderSpriteId = CreateSprite(&sSpriteTemplate_Border, 32, 16, 0);
 }
@@ -1080,11 +1028,7 @@ static void CreateBorder(void)
 static void CreateBorder2(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Border_2.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Border_2.size;
-		s.tag = BORDER_2_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Border_2);
 	
 	sFlappy->BorderSprite2Id = CreateSprite(&sSpriteTemplate_Border_2, 32, 16 + 128, 0);
 }
@@ -1092,11 +1036,7 @@ static void CreateBorder2(void)
 static void CreateButterfree(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Butterfree.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Butterfree.size;
-		s.tag = BUTTERFREE_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Butterfree);
 	
 	sFlappy->ButterfreeSpriteId = CreateSprite(&sSpriteTemplate_Butterfree, gSprites[sFlappy->ButterfreeHitboxSpriteId].x - 5, gSprites[sFlappy->ButterfreeHitboxSpriteId].y - 6, 1);
 }
@@ -1105,11 +1045,7 @@ static void CreateDamage(void)
 {
 	struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Damage.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Damage.size;
-		s.tag = DAMAGE_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Damage);
 	
 	sFlappy->DamageSpriteId = CreateSprite(&sSpriteTemplate_Damage, gSprites[sFlappy->ButterfreeHitboxSpriteId].x - 5, gSprites[sFlappy->ButterfreeHitboxSpriteId].y - 6, 1);
 }
@@ -1117,11 +1053,7 @@ static void CreateDamage(void)
 static void CreateTrail(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Trail.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Trail.size;
-		s.tag = TRAIL_GFXTAG;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Trail);
 	
 	sFlappy->TrailSpriteId = CreateSprite(&sSpriteTemplate_Trail, gSprites[sFlappy->ButterfreeHitboxSpriteId].x - 16, gSprites[sFlappy->ButterfreeHitboxSpriteId].y, 3);
 }

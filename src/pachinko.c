@@ -591,8 +591,8 @@ static const u32 sBallPokeballGfx[] = INCBIN_U32("graphics/pinball/ball_pokeball
 static const u16 sBallPokeballPalette[] = INCBIN_U16("graphics/pinball/ball_pokeball.gbapal");
 static const u32 sFlipperGfx[] = INCBIN_U32("graphics/pinball/flipper.4bpp.lz");
 static const u16 sFlipperPalette[] = INCBIN_U16("graphics/pinball/flipper.gbapal");
-static const u8 sFlipperLeftMinigameCollisionMasks[][0x80] = INCBIN_U8("graphics/pinball/flipper_left_masks_minigame.1bpp");
-static const u8 sFlipperRightMinigameCollisionMasks[][0x80] = INCBIN_U8("graphics/pinball/flipper_right_masks_minigame.1bpp");
+static const u8 sFlipperLeftMinigameCollisionMasks[] = INCBIN_U8("graphics/pinball/flipper_left_masks_minigame.1bpp");
+static const u8 sFlipperRightMinigameCollisionMasks[] = INCBIN_U8("graphics/pinball/flipper_right_masks_minigame.1bpp");
 static const u32 sTimerDigitsGfx[] = INCBIN_U32("graphics/pinball/timer_digits.4bpp.lz");
 static const u16 sTimerDigitsPalette[] = INCBIN_U16("graphics/pinball/timer_digits.gbapal");
 
@@ -2761,11 +2761,7 @@ static void CreatePlayerSprites(void)
     for (i = 0; i < ARRAY_COUNT(sSpriteSheets_PlayerInterface) - 1; i++)  
     {
         struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheets_PlayerInterface[i].data, gDecompressionBuffer);
-        s.data = gDecompressionBuffer;
-        s.size = sSpriteSheets_PlayerInterface[i].size;
-        s.tag = sSpriteSheets_PlayerInterface[i].tag;
-        LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheets_PlayerInterface[i]);
     }
 
     for (i = 0; i < 4; i++)
@@ -3292,11 +3288,7 @@ static void CreateNewLevel(void)
 	struct SpriteSheet s;
 	
 	LoadSpritePalettes(sSpritePalettes2);
-        LZ77UnCompWram(sSpriteSheet_NewLevel.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_NewLevel.size;
-		s.tag = GFXTAG_NEWLEVEL;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_NewLevel);
 	
 	sScore->NewLevelSpriteId = CreateSprite(&sSpriteTemplate_NewLevel, 92, 82, 0);
 	//gSprites[sScore->WinSpriteId].invisible = TRUE;
@@ -3307,11 +3299,7 @@ static void CreateWin(void)
 	struct SpriteSheet s;
 	
 	LoadSpritePalettes(sSpritePalettes2);
-        LZ77UnCompWram(sSpriteSheet_Win.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Win.size;
-		s.tag = GFXTAG_WIN;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Win);
 	
 	sScore->WinSpriteId = CreateSprite(&sSpriteTemplate_Win, 92, 82, 0);
 	//gSprites[sScore->WinSpriteId].invisible = TRUE;
@@ -3322,11 +3310,7 @@ static void CreateGameOver(void)
 	struct SpriteSheet s;
 	
 	LoadSpritePalettes(sSpritePalettes2);
-        LZ77UnCompWram(sSpriteSheet_GameOver.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_GameOver.size;
-		s.tag = GFXTAG_GAMEOVER;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_GameOver);
 	
 	sScore->GameOverSpriteId = CreateSprite(&sSpriteTemplate_GameOver, 92, 82, 0);
 	//gSprites[sScore->GameOverSpriteId].invisible = TRUE;
@@ -3335,11 +3319,7 @@ static void CreateGameOver(void)
 static void CreateTitle(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Title.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Title.size;
-		s.tag = GFXTAG_TITLE;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Title);
 	
 	sScore->TitleSpriteId = CreateSprite(&sSpriteTemplate_Title, 92, 82, 0);
 }
@@ -3347,11 +3327,7 @@ static void CreateTitle(void)
 static void CreateArrow(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Arrow.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Arrow.size;
-		s.tag = GFXTAG_ARROW;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Arrow);
 	
 	sScore->ArrowSpriteId = CreateSprite(&sSpriteTemplate_Arrow, 36, 20, 0);
 }
@@ -3367,11 +3343,7 @@ static void CreateLives(void)
 	s16 x5 = x + 32;
 	
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Lives.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Lives.size;
-		s.tag = GFXTAG_LIVES;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Lives);
 	
 	sScore->Live1SpriteId = CreateSprite(&sSpriteTemplate_Lives, x, y, 0);
 	sScore->Live2SpriteId = CreateSprite(&sSpriteTemplate_Lives, x2, y, 0);
@@ -3435,11 +3407,7 @@ static void UpdateLives(void)
 static void CreateSpinarak(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Spinarak.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Spinarak.size;
-		s.tag = GFXTAG_SPINARAK;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Spinarak);
 	
 	sScore->SpinarakSpriteId = CreateSprite(&sSpriteTemplate_Spinarak, 208, 48, 0);
 }
@@ -3447,11 +3415,7 @@ static void CreateSpinarak(void)
 static void CreateSpeed(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Speed.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Speed.size;
-		s.tag = GFXTAG_SPEED;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Speed);
 	
 	sScore->SpeedSpriteId = CreateSprite(&sSpriteTemplate_Speed, 208, 160, 0);
 }
@@ -3459,11 +3423,7 @@ static void CreateSpeed(void)
 static void CreateMultiplier(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Multiplier.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Multiplier.size;
-		s.tag = GFXTAG_MULTIPLIER;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Multiplier);
 	
 	sScore->MultiplierSpriteId = CreateSprite(&sSpriteTemplate_Multiplier, 208, 96, 0);
 }
@@ -4487,10 +4447,10 @@ static void DrawSeelScoreJewels(struct Seel *seel)
 
 static void HandleBallPhysics(void)
 {
-    bool32 isFlipperColliding;
+    bool32 isFlipperColliding = FALSE;
     bool32 isStaticColliding;
     bool32 isObjectColliding = FALSE;
-    u8 flipperCollisionNormal;
+    u8 flipperCollisionNormal = 0;
     u8 objectCollisionNormal;
     u8 staticCollisionNormal;
     u8 collisionNormal;
@@ -4751,6 +4711,7 @@ static bool32 HandleFlippers(struct Ball *ball, u16 *outYForce, u8 *outCollision
     //    collided = CheckFlipperCollision(ball, &sPinballGame->leftFlipper, outYForce, outCollisionNormal, outCollisionAmplification);
 
     //return collided;
+    return FALSE;
 }
 
 #define FLIPPER_STATE_DELTA 0x0333
@@ -4839,7 +4800,7 @@ static bool32 CheckFlipperCollision(struct Ball *ball, struct Flipper *flipper, 
     //    *outCollisionAmplification = 0;
     //}
     //
-    //return TRUE;
+    return TRUE;
 }
 
 #define MAX_POS_UPDATE 0x04FF
@@ -4999,6 +4960,7 @@ static u8 GetCollisionAttribute(u8 gameType, bool32 ballIsEntering, int index)
 
     switch (gameType)
     {
+    default:
     case GAME_TYPE_MEOWTH:
         entranceCollisionMap = sMeowthStageEntranceBgCollisionMap;
         collisionMap = sMeowthStageBgCollisionMap;
@@ -5029,13 +4991,14 @@ static u8 GetCollisionMaskRow(u8 gameType, int collisionAttribute, int row)
     int state;
     int offset;
     const u8 *flipperStateMasks;
-    u8 mask;
+    u8 mask = 0;
 
     if (collisionAttribute < 0xE0)
     {
         const u8 *masks;
         switch (gameType)
         {
+        default:
         case GAME_TYPE_MEOWTH:
             masks = sMeowthStageBgCollisionMasks;
             break;
@@ -5967,8 +5930,8 @@ static bool32 UpdateDiglett(struct Diglett *diglett)
     //    //}
     //}
     //
-    //return FALSE;
-}   //
+    return FALSE;
+}
 
 static void UpdateDiglettTiles(u16 *tilemap, int index, struct Diglett *diglett)
 {
@@ -6602,7 +6565,7 @@ static void UpdateGengarGhost(struct Gengar *gengar)
 
 static void UpdateGhost(struct Gengar *gengar, struct GraveyardGhost *ghost, u8 *numGhostHits, u8 nextState, int numGhosts)
 {
-	u8 multiplier;
+	u8 multiplier = 0;
     struct Sprite *sprite = &gSprites[ghost->spriteId];
 	
 	if (numGhostHits == &gengar->numGastlyHits)

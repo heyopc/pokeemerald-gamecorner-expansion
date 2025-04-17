@@ -649,11 +649,7 @@ static void CreateCreditSprites(void)
 	for (i = 0; i < ARRAY_COUNT(sSpriteSheets_Interface) - 1; i++)  
 		{
 			struct SpriteSheet s;
-			LZ77UnCompWram(sSpriteSheets_Interface[i].data, gDecompressionBuffer);
-			s.data = gDecompressionBuffer;
-			s.size = sSpriteSheets_Interface[i].size;
-			s.tag = sSpriteSheets_Interface[i].tag;
-			LoadSpriteSheet(&s);
+			LoadCompressedSpriteSheet(&sSpriteSheets_Interface[i]);
 		}
 
     for (i = 0; i < 4; i++)
@@ -688,11 +684,7 @@ static void CreateCreditSprites(void)
 static void CreateCoins(void)
 {
 	struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Coins.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Coins.size;
-		s.tag = GFX_COINS;
-		LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheet_Coins);
 	
 	sVflip->CoinsSpriteId = CreateSprite(&sSpriteTemplate_Coins, 198, 132, 0);
 }
