@@ -20,9 +20,9 @@
 #define FLDEFF_JUMP_SMALL_SPLASH         16
 #define FLDEFF_LONG_GRASS                17
 #define FLDEFF_JUMP_LONG_GRASS           18
-#define FLDEFF_UNUSED_GRASS              19
-#define FLDEFF_UNUSED_GRASS_2            20
-#define FLDEFF_UNUSED_SAND               21
+#define FLDEFF_SHAKING_GRASS             19
+#define FLDEFF_SHAKING_LONG_GRASS        20
+#define FLDEFF_SAND_HOLE                 21
 #define FLDEFF_WATER_SURFACING           22
 #define FLDEFF_BERRY_TREE_GROWTH_SPARKLE 23
 #define FLDEFF_DEEP_SAND_FOOTPRINTS      24
@@ -35,6 +35,7 @@
 #define FLDEFF_USE_FLY                   31
 #define FLDEFF_FLY_IN                    32
 #define FLDEFF_QUESTION_MARK_ICON        33
+#define FLDEFF_EMOTE                     33 // shares a slot with FLDEFF_QUESTION_MARK_ICON
 #define FLDEFF_FEET_IN_FLOWING_WATER     34
 #define FLDEFF_BIKE_TIRE_TRACKS          35
 #define FLDEFF_SAND_DISGUISE             36
@@ -68,6 +69,13 @@
 #define FLDEFF_RAYQUAZA_SPOTLIGHT        64
 #define FLDEFF_DESTROY_DEOXYS_ROCK       65
 #define FLDEFF_MOVE_DEOXYS_ROCK          66
+#define FLDEFF_USE_VS_SEEKER             67
+#define FLDEFF_X_ICON                    68
+#define FLDEFF_DOUBLE_EXCL_MARK_ICON     69
+#define FLDEFF_TRACKS_SLITHER            70
+#define FLDEFF_TRACKS_SPOT               71
+#define FLDEFF_TRACKS_BUG                72
+#define FLDEFF_CAVE_DUST                 73
 
 #define FLDEFFOBJ_SHADOW_S              0
 #define FLDEFFOBJ_SHADOW_M              1
@@ -106,6 +114,10 @@
 #define FLDEFFOBJ_BUBBLES               34
 #define FLDEFFOBJ_SMALL_SPARKLE         35
 #define FLDEFFOBJ_RAYQUAZA              36
+#define FLDEFFOBJ_TRACKS_SLITHER        37
+#define FLDEFFOBJ_TRACKS_SPOT           38
+#define FLDEFFOBJ_TRACKS_BUG            39
+#define FLDEFFOBJ_CAVE_DUST             40
 
 #define FLDEFF_PAL_TAG_CUT_GRASS          0x1000
 #define FLDEFF_PAL_TAG_SECRET_POWER_TREE  0x1003
@@ -119,5 +131,6 @@
 #define FLDEFF_PAL_TAG_SMALL_SPARKLE      0x100F
 #define FLDEFF_PAL_TAG_HOF_MONITOR        0x1010
 #define FLDEFF_PAL_TAG_UNKNOWN            0x1011
+#define FLDEFF_PAL_TAG_CAVE_DUST          0x1012
 
 #endif // GUARD_FIELD_EFFECT_CONSTANTS_H

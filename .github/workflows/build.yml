@@ -2,68 +2,40 @@ name: CI
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - upcoming
   pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: devkitpro/devkitarm
     env:
       GAME_VERSION: EMERALD
       GAME_REVISION: 0
       GAME_LANGUAGE: ENGLISH
-      MODERN: 0
-      COMPARE: 1
+      COMPARE: 0
+      UNUSED_ERROR: 1
     steps:
       - name: Checkout
-        uses: actions/checkout@master
-
-      - name: Checkout syms
-        if: ${{ github.event_name == 'push' }}
-        uses: actions/checkout@master
-        with:
-          path: symbols
-          ref: symbols
-
-      - name: Checkout agbcc
-        uses: actions/checkout@master
-        with:
-          path: agbcc
-          repository: pret/agbcc
+        uses: actions/checkout@v2
 
       - name: Install binutils
         run: |
-          sudo apt install gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev
+          sudo apt update
+          sudo apt install -y build-essential libpng-dev libelf-dev
         # build-essential and git are already installed
         # gcc-arm-none-eabi is only needed for the modern build
         # as an alternative to dkP
 
-      - name: Install agbcc
-        run: |
-          ./build.sh
-          ./install.sh ../
-        working-directory: agbcc
-
-      - name: Compare
-        run: make -j${nproc} all syms
-
-      - name: Modern
+      - name: ROM
         env:
-          MODERN: 1
           COMPARE: 0
-        run: make -j${nproc} all
+        run: make -j${nproc} -O all
 
-      - name: Move symfiles
-        if: ${{ github.event_name == 'push' }}
+      - name: Test
+        env:
+          TEST: 1
         run: |
-          cp -v *.sym symbols/
-          echo "SYMBOLS_COMMIT_MSG=$( git log --format=%s ${GITHUB_SHA} )" >> $GITHUB_ENV
-
-      - name: Update symfiles
-        if: ${{ github.event_name == 'push' }}
-        uses: EndBug/add-and-commit@v7
-        with:
-          branch: symbols
-          cwd: "./symbols"
-          add: "*.sym"
-          message: ${{ env.SYMBOLS_COMMIT_MSG }}
+          make -j${nproc} check

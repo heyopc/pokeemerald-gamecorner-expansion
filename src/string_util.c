@@ -2,6 +2,7 @@
 #include "string_util.h"
 #include "text.h"
 #include "strings.h"
+#include "union_room_chat.h"
 
 EWRAM_DATA u8 gStringVar1[0x100] = {0};
 EWRAM_DATA u8 gStringVar2[0x100] = {0};
@@ -44,7 +45,7 @@ u8 *StringCopy_Nickname(u8 *dest, const u8 *src)
 
 u8 *StringGet_Nickname(u8 *str)
 {
-    u8 i;
+    u32 i;
     u32 limit = POKEMON_NAME_LENGTH;
 
     for (i = 0; i < limit; i++)
@@ -95,7 +96,7 @@ u8 *StringAppend(u8 *dest, const u8 *src)
 
 u8 *StringCopyN(u8 *dest, const u8 *src, u8 n)
 {
-    u16 i;
+    u32 i;
 
     for (i = 0; i < n; i++)
         dest[i] = src[i];
@@ -117,6 +118,28 @@ u16 StringLength(const u8 *str)
 
     while (str[length] != EOS)
         length++;
+
+    return length;
+}
+
+u16 StringLineLength(const u8 *str)
+{
+    u16 i = 0, length = 0;
+
+    while (str[length] != EOS)
+    {
+        switch (str[length])
+        {
+        case CHAR_PROMPT_SCROLL:
+        case CHAR_PROMPT_CLEAR:
+        case CHAR_NEWLINE:
+            return length;
+        default:
+            i++;
+            length++;
+            break;
+        }
+    }
 
     return length;
 }
@@ -151,7 +174,7 @@ s32 StringCompareN(const u8 *str1, const u8 *str2, u32 n)
 
 bool8 IsStringLengthAtLeast(const u8 *str, s32 n)
 {
-    u8 i;
+    u32 i;
 
     for (i = 0; i < n; i++)
         if (str[i] && str[i] != EOS)
@@ -275,7 +298,7 @@ u8 *ConvertUIntToDecimalStringN(u8 *dest, u32 value, enum StringConvertMode mode
 u8 *ConvertIntToHexStringN(u8 *dest, s32 value, enum StringConvertMode mode, u8 n)
 {
     enum { WAITING_FOR_NONZERO_DIGIT, WRITING_DIGITS, WRITING_SPACES } state;
-    u8 i;
+    u32 i;
     s32 powerOfSixteen;
     s32 largestPowerOfSixteen = 1;
 
@@ -526,7 +549,7 @@ const u8 *GetExpandedPlaceholder(u32 id)
 
 u8 *StringFill(u8 *dest, u8 c, u16 n)
 {
-    u16 i;
+    u32 i;
 
     for (i = 0; i < n; i++)
         *dest++ = c;
@@ -740,7 +763,7 @@ void ConvertInternationalString(u8 *s, u8 language)
 {
     if (language == LANGUAGE_JAPANESE)
     {
-        u8 i;
+        u32 i;
 
         StripExtCtrlCodes(s);
         i = StringLength(s);
@@ -750,7 +773,7 @@ void ConvertInternationalString(u8 *s, u8 language)
 
         i--;
 
-        while (i != (u8)-1)
+        while (i != -1)
         {
             s[i + 2] = s[i];
             i--;
@@ -778,4 +801,20 @@ void StripExtCtrlCodes(u8 *str)
         }
     }
     str[destIndex] = EOS;
+}
+
+u8 *StringCopyUppercase(u8 *dest, const u8 *src)
+{
+    while (*src != EOS)
+    {
+        if (*src >= CHAR_a && *src <= CHAR_z)
+            *dest = gCaseToggleTable[*src];
+        else
+            *dest = *src;
+        dest++;
+        src++;
+    }
+
+    *dest = EOS;
+    return dest;
 }

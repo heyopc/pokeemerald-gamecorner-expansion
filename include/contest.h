@@ -3,6 +3,7 @@
 
 #include "palette.h"
 #include "constants/contest.h"
+#include "random.h" // for rng_value_t
 
 enum
 {
@@ -106,9 +107,11 @@ struct ContestPokemon
     u8 sheen;
     u8 highestRank;
     bool8 gameCleared;
-    u8 unused[10];
+    u8 isShiny:1;
+    u8 unused1:7;
     u32 personality;
     u32 otId;
+    u8 filter;
 };
 
 struct ContestTempSave
@@ -124,6 +127,8 @@ struct ContestMoveAnimData
     u16 species;
     u16 targetSpecies;
     bool8 hasTargetAnim:1;
+    u8 isShiny:1;
+    u8 targetIsShiny:1;
     u8 contestant;
     u32 personality;
     u32 otId;
@@ -291,7 +296,7 @@ struct ContestResources
     struct ContestMoveAnimData *moveAnim;
     struct ContestTV *tv;
     struct ContestUnused * unused;
-    u8 * contestBgTilemaps[CONTESTANT_COUNT];
+    u8 *contestBgTilemaps[CONTESTANT_COUNT];
     void * boxBlinkTiles1;
     void * boxBlinkTiles2;
     void * animBgTileBuffer;
@@ -327,7 +332,7 @@ extern struct ContestResources *gContestResources;
 extern struct ContestWinner gCurContestWinner;
 extern u8 gCurContestWinnerIsForArtist;
 extern u8 gCurContestWinnerSaveIdx;
-extern u32 gContestRngValue;
+extern rng_value_t gContestRngValue;
 
 // contest.c
 void ResetLinkContestBoolean(void);

@@ -523,8 +523,8 @@ static const u32 sBallPokeballGfx[] = INCBIN_U32("graphics/pinball/ball_pokeball
 static const u16 sBallPokeballPalette[] = INCBIN_U16("graphics/pinball/ball_pokeball.gbapal");
 static const u32 sFlipperGfx[] = INCBIN_U32("graphics/pinball/flipper.4bpp.lz");
 static const u16 sFlipperPalette[] = INCBIN_U16("graphics/pinball/flipper.gbapal");
-static const u8 sFlipperLeftMinigameCollisionMasks[][0x80] = INCBIN_U8("graphics/pinball/flipper_left_masks_minigame.1bpp");
-static const u8 sFlipperRightMinigameCollisionMasks[][0x80] = INCBIN_U8("graphics/pinball/flipper_right_masks_minigame.1bpp");
+static const u8 sFlipperLeftMinigameCollisionMasks[][0x200] = { INCBIN_U8("graphics/pinball/flipper_left_masks_minigame.1bpp"), };
+static const u8 sFlipperRightMinigameCollisionMasks[][0x200] = { INCBIN_U8("graphics/pinball/flipper_right_masks_minigame.1bpp"), };
 static const u32 sTimerDigitsGfx[] = INCBIN_U32("graphics/pinball/timer_digits.4bpp.lz");
 static const u16 sTimerDigitsPalette[] = INCBIN_U16("graphics/pinball/timer_digits.gbapal");
 
@@ -2207,11 +2207,7 @@ static void CreatePlayerSprites(void)
     for (i = 0; i < ARRAY_COUNT(sSpriteSheets_PlayerInterface) - 1; i++)  
     {
         struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheets_PlayerInterface[i].data, gDecompressionBuffer);
-        s.data = gDecompressionBuffer;
-        s.size = sSpriteSheets_PlayerInterface[i].size;
-        s.tag = sSpriteSheets_PlayerInterface[i].tag;
-        LoadSpriteSheet(&s);
+        LoadCompressedSpriteSheet(&sSpriteSheets_PlayerInterface[i]);
     }
 
     for (i = 0; i < 4; i++)
@@ -3327,6 +3323,7 @@ static u8 GetCollisionAttribute(u8 gameType, bool32 ballIsEntering, int index)
 
     switch (gameType)
     {
+    default:
     case GAME_TYPE_MEOWTH:
         entranceCollisionMap = sMeowthStageEntranceBgCollisionMap;
         collisionMap = sMeowthStageBgCollisionMap;
@@ -3364,6 +3361,7 @@ static u8 GetCollisionMaskRow(u8 gameType, int collisionAttribute, int row)
         const u8 *masks;
         switch (gameType)
         {
+        default:
         case GAME_TYPE_MEOWTH:
             masks = sMeowthStageBgCollisionMasks;
             break;
@@ -4913,7 +4911,7 @@ static void UpdateGengarGhost(struct Gengar *gengar)
 
 static void UpdateGhost(struct Gengar *gengar, struct GraveyardGhost *ghost, u8 *numGhostHits, u8 nextState, int numGhosts)
 {
-	u8 multiplier;
+	u8 multiplier = 0;
     struct Sprite *sprite = &gSprites[ghost->spriteId];
 	
 	if (numGhostHits == &gengar->numGastlyHits)

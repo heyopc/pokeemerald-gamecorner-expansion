@@ -33,7 +33,6 @@ struct Weather
         } s1;
         struct
         {
-            u8 filler0[0xA0];
             struct Sprite *fogHSprites[NUM_FOG_HORIZONTAL_SPRITES];
             struct Sprite *ashSprites[NUM_ASH_SPRITES];
             struct Sprite *fogDSprites[NUM_FOG_DIAGONAL_SPRITES];
@@ -41,8 +40,6 @@ struct Weather
             struct Sprite *sandstormSprites2[NUM_SWIRL_SANDSTORM_SPRITES];
         } s2;
     } sprites;
-    u8 darkenedContrastColorMaps[NUM_WEATHER_COLOR_MAPS][32];
-    u8 contrastColorMaps[NUM_WEATHER_COLOR_MAPS][32];
     s8 colorMapIndex;
     s8 targetColorMapIndex;
     u8 colorMapStepDelay;
@@ -131,8 +128,7 @@ struct Weather
     s16 droughtLastBrightnessStage;
     s16 droughtTimer;
     s16 droughtState;
-    u8 droughtUnused[9];
-    s8 loadDroughtPalsIndex;
+    u8 loadDroughtPalsIndex;
     u8 loadDroughtPalsOffset;
 };
 
@@ -170,6 +166,7 @@ void SetWeatherScreenFadeOut(void);
 void SetWeatherPalStateIdle(void);
 void PreservePaletteInWeather(u8 preservedPalIndex);
 void ResetPreservedPalettesInWeather(void);
+bool32 IsWeatherAlphaBlend(void);
 
 // field_weather_effect.c
 void Clouds_InitVars(void);

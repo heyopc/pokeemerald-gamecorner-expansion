@@ -668,7 +668,7 @@ static void DrawListIndexNumber(s32 windowId, s32 index, s32 max)
     u8 strbuf[16];
     u32 x;
 
-    u8 * ptr = strbuf;
+    u8 *ptr = strbuf;
     ptr = ConvertIntToDecimalStringN(ptr, index, STR_CONV_MODE_RIGHT_ALIGN, 3);
     *ptr++ = CHAR_SLASH;
     ConvertIntToDecimalStringN(ptr, max, STR_CONV_MODE_RIGHT_ALIGN, 3);
@@ -695,13 +695,14 @@ static void CreateRibbonMonsList(void)
 }
 
 // Buffers the "Nickname gender/level" text for the ribbon mon list
-static void BufferRibbonMonInfoText(struct PokenavListItem * listItem, u8 * dest)
+static void BufferRibbonMonInfoText(struct PokenavListItem * listItem, u8 *dest)
 {
     u8 gender;
     u8 level;
-    u8 * s;
-    const u8 * genderStr;
+    u8 *s, *end;
+    const u8 *genderStr;
     struct PokenavMonListItem * item = (struct PokenavMonListItem *)listItem;
+    u32 fontId;
 
     // Mon is in party
     if (item->boxId == TOTAL_BOXES_COUNT)
@@ -720,8 +721,6 @@ static void BufferRibbonMonInfoText(struct PokenavListItem * listItem, u8 * dest
         GetBoxMonData(mon, MON_DATA_NICKNAME, gStringVar3);
     }
 
-    StringGet_Nickname(gStringVar3);
-    dest = GetStringClearToWidth(dest, FONT_NORMAL, gStringVar3, 60);
     switch (gender)
     {
     default:
@@ -734,6 +733,10 @@ static void BufferRibbonMonInfoText(struct PokenavListItem * listItem, u8 * dest
         genderStr = sText_FemaleSymbol;
         break;
     }
+    end = StringGet_Nickname(gStringVar3);
+    fontId = GetFontIdToFit(gStringVar3, FONT_NORMAL, 0, 60);
+    WrapFontIdToFit(gStringVar3, end, FONT_NORMAL, 60);
+    dest = GetStringClearToWidth(dest, fontId, gStringVar3, 60);
 
     s = StringCopy(gStringVar1, genderStr);
     *s++ = CHAR_SLASH;

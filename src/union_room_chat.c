@@ -335,7 +335,7 @@ static const u8 sKeyboardPageMaxRow[UNION_ROOM_KB_PAGE_COUNT] =
     [UNION_ROOM_KB_PAGE_REGISTER] = 9
 };
 
-static const u8 sCaseToggleTable[256] = {
+const u8 gCaseToggleTable[256] = {
     [CHAR_A] = CHAR_a,
     [CHAR_B] = CHAR_b,
     [CHAR_C] = CHAR_c,
@@ -913,7 +913,9 @@ void EnterUnionRoomChat(void)
 
 static void InitUnionRoomChat(struct UnionRoomChat *chat)
 {
+#if FREE_UNION_ROOM_CHAT == FALSE
     int i;
+#endif //FREE_UNION_ROOM_CHAT
 
     chat->funcId = CHAT_FUNC_JOIN;
     chat->funcState = 0;
@@ -929,8 +931,10 @@ static void InitUnionRoomChat(struct UnionRoomChat *chat)
     chat->exitType = CHAT_EXIT_NONE;
     chat->changedRegisteredTexts = FALSE;
     PrepareSendBuffer_Null(chat->sendMessageBuffer);
+#if FREE_UNION_ROOM_CHAT == FALSE
     for (i = 0; i < UNION_ROOM_KB_ROW_COUNT; i++)
         StringCopy(chat->registeredTexts[i], gSaveBlock1Ptr->registeredTexts[i]);
+#endif //FREE_UNION_ROOM_CHAT
 }
 
 static void FreeUnionRoomChat(void)
@@ -1734,7 +1738,7 @@ static void SwitchCaseOfLastMessageCharacter(void)
     str = GetLastCharOfMessagePtr();
     if (*str != CHAR_EXTRA_SYMBOL)
     {
-        character = sCaseToggleTable[*str];
+        character = gCaseToggleTable[*str];
         if (character)
             *str = character;
     }
@@ -1764,9 +1768,11 @@ static void ResetMessageEntryBuffer(void)
 
 static void SaveRegisteredTexts(void)
 {
+#if FREE_UNION_ROOM_CHAT == FALSE
     int i;
     for (i = 0; i < UNION_ROOM_KB_ROW_COUNT; i++)
         StringCopy(gSaveBlock1Ptr->registeredTexts[i], sChat->registeredTexts[i]);
+#endif //FREE_UNION_ROOM_CHAT
 }
 
 static u8 *GetRegisteredTextByRow(int row)
@@ -1953,7 +1959,7 @@ static u8 *GetLimitedMessageStartPtr(void)
     for (i = 0; i < numChars; i++)
     {
         if (*str == CHAR_EXTRA_SYMBOL)
-            *str++;
+            str++;
 
         str++;
     }
@@ -1997,7 +2003,7 @@ static int GetShouldShowCaseToggleIcon(void)
 {
     u8 *str = GetLastCharOfMessagePtr();
     u32 character = *str;
-    if (character > EOS || sCaseToggleTable[character] == character || sCaseToggleTable[character] == CHAR_SPACE)
+    if (character > EOS || gCaseToggleTable[character] == character || gCaseToggleTable[character] == CHAR_SPACE)
         return 3; // Don't show
     else
         return 0; // Show
@@ -2010,6 +2016,7 @@ static u8 *GetChatHostName(void)
 
 void InitUnionRoomChatRegisteredTexts(void)
 {
+#if FREE_UNION_ROOM_CHAT == FALSE
     StringCopy(gSaveBlock1Ptr->registeredTexts[0], gText_Hello);
     StringCopy(gSaveBlock1Ptr->registeredTexts[1], gText_Pokemon2);
     StringCopy(gSaveBlock1Ptr->registeredTexts[2], gText_Trade);
@@ -2020,6 +2027,7 @@ void InitUnionRoomChatRegisteredTexts(void)
     StringCopy(gSaveBlock1Ptr->registeredTexts[7], gText_YaySmileEmoji);
     StringCopy(gSaveBlock1Ptr->registeredTexts[8], gText_ThankYou);
     StringCopy(gSaveBlock1Ptr->registeredTexts[9], gText_ByeBye);
+#endif //FREE_UNION_ROOM_CHAT
 }
 
 #define tState               data[0]
@@ -3115,9 +3123,6 @@ static void DrawKeyboardWindow(void)
 static void LoadTextEntryWindow(void)
 {
     int i;
-    u8 unused[2];
-    unused[0] = 0;
-    unused[1] = 0xFF;
 
     // Pointless, cleared below. The tiles are nonsense anyway, see LoadChatWindowGfx.
     for (i = 0; i < MAX_MESSAGE_LENGTH; i++)

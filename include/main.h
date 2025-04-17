@@ -53,10 +53,10 @@ extern u16 gKeyRepeatContinueDelay;
 extern bool8 gSoftResetDisabled;
 extern IntrFunc gIntrTable[];
 extern u8 gLinkVSyncDisabled;
-extern u32 IntrMain_Buffer[];
 extern s8 gPcmDmaCounter;
 
 void AgbMain(void);
+void AgbMainLoop(void);
 void SetMainCallback2(MainCallback callback);
 void InitKeys(void);
 void SetVBlankCallback(IntrCallback callback);

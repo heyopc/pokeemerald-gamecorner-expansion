@@ -254,15 +254,26 @@
 	.endm
 
 	@ Calls the native C function stored at func.
-	.macro callnative func:req
+	@ 'callnative's should set 'requests_effects=1' if the native
+	@ contains a call to 'Script_RequestEffects', which allows them
+	@ to be analyzed by 'RunScriptImmediatelyUntilEffect'.
+	.macro callnative func:req, requests_effects=0
 	.byte SCR_OP_CALLNATIVE
+	.if \requests_effects == 0
 	.4byte \func
+	.else
+	.4byte \func + ROM_SIZE
+	.endif
 	.endm
 
 	@ Replaces the script with the function stored at func. Execution returns to the bytecode script when func returns TRUE.
-	.macro gotonative func:req
+	.macro gotonative func:req, requests_effects=0
 	.byte SCR_OP_GOTONATIVE
+	.if \requests_effects == 0
 	.4byte \func
+	.else
+	.4byte \func + ROM_SIZE
+	.endif
 	.endm
 
 	@ Calls a function listed in the table in data/specials.inc.
@@ -683,59 +694,31 @@
 	.byte \direction
 	.endm
 
+	NULL = 0
+	OBJ_ID_NONE = 0
+
 	@ Configures the arguments for a trainer battle, then jumps to the appropriate script in scripts/trainer_battle.inc
-	.macro trainerbattle type:req, trainer:req, local_id:req, pointer1:req, pointer2, pointer3, pointer4
+	.macro trainerbattle type:req localIdA:req, trainer_a:req, intro_text_a:req, lose_text_a:req, event_script_a:req, localIdB:req, trainer_b:req, intro_text_b:req, lose_text_b:req, event_script_b:req, victory_text:req, cannot_battle:req, isDouble:req, playMusicA:req, playMusicB:req, isRematch:req
 	.byte SCR_OP_TRAINERBATTLE
-	.byte \type
-	.2byte \trainer
-	.2byte \local_id
-	.if \type == TRAINER_BATTLE_SINGLE
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-	.elseif \type == TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-		.4byte \pointer3 @ event script
-	.elseif \type == TRAINER_BATTLE_CONTINUE_SCRIPT
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-		.4byte \pointer3 @ event script
-	.elseif \type == TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT
-		.4byte \pointer1 @ text
-	.elseif \type == TRAINER_BATTLE_DOUBLE
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-		.4byte \pointer3 @ text
-	.elseif \type == TRAINER_BATTLE_REMATCH
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-	.elseif \type == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-		.4byte \pointer3 @ text
-		.4byte \pointer4 @ event script
-	.elseif \type == TRAINER_BATTLE_REMATCH_DOUBLE
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-		.4byte \pointer3 @ text
-	.elseif \type == TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-		.4byte \pointer3 @ text
-		.4byte \pointer4 @ event script
-	.elseif \type == TRAINER_BATTLE_PYRAMID
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-	.elseif \type == TRAINER_BATTLE_SET_TRAINER_A
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-	.elseif \type == TRAINER_BATTLE_SET_TRAINER_B
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-	.elseif \type == TRAINER_BATTLE_HILL
-		.4byte \pointer1 @ text
-		.4byte \pointer2 @ text
-	.endif
+	.set trainerbattle_flags, 0
+	.ifgt \isDouble; .set trainerbattle_flags, trainerbattle_flags | (1 << 0); .endif
+	.ifgt \isRematch; .set trainerbattle_flags, trainerbattle_flags | (1 << 1); .endif
+	.ifgt \playMusicA; .set trainerbattle_flags, trainerbattle_flags | (1 << 2); .endif
+	.ifgt \playMusicB; .set trainerBattle_flags, trainerbattle_flags | (1 << 3); .endif
+	.ifgt \type; .set trainerbattle_flags, trainerbattle_flags | (\type << 4); .endif
+	.byte trainerbattle_flags
+	.byte \localIdA             @ objEventLocalIdA
+	.2byte \trainer_a           @ opponentA
+	.4byte \intro_text_a        @ introTextA
+	.4byte \lose_text_a         @ defeatTextA
+	.4byte \event_script_a      @ retAddrA
+	.byte  \localIdB            @ objEventLocalIdB
+	.2byte \trainer_b           @ opponentB
+	.4byte \intro_text_b        @ introTextB
+	.4byte \lose_text_b         @ defeatTextB
+	.4byte \event_script_b      @ retAddrB
+	.4byte \victory_text        @ victoryText
+	.4byte \cannot_battle       @ cannotBattle
 	.endm
 
 	NO_MUSIC = FALSE
@@ -744,11 +727,11 @@
 	@ When used with an event script, you can also pass in an optional flag to disable music
 	.macro trainerbattle_single trainer:req, intro_text:req, lose_text:req, event_script=FALSE, music=TRUE
 	.if \event_script == FALSE
-	trainerbattle TRAINER_BATTLE_SINGLE, \trainer, 0, \intro_text, \lose_text
+	trainerbattle TRAINER_BATTLE_SINGLE, OBJ_ID_NONE, \trainer, \intro_text, \lose_text, NULL, OBJ_ID_NONE, TRAINER_NONE, NULL, NULL, NULL, NULL, NULL, FALSE, TRUE, FALSE, FALSE
 	.elseif \music == TRUE
-	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT, \trainer, 0, \intro_text, \lose_text, \event_script
+	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT, OBJ_ID_NONE, \trainer, \intro_text, \lose_text, \event_script, OBJ_ID_NONE, TRAINER_NONE, NULL, NULL, NULL, NULL, NULL, FALSE, TRUE, FALSE, FALSE
 	.else
-	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC, \trainer, 0, \intro_text, \lose_text, \event_script
+	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT_NO_MUSIC, OBJ_ID_NONE, \trainer, \intro_text, \lose_text, \event_script, OBJ_ID_NONE, TRAINER_NONE, NULL, NULL, NULL, NULL, NULL, FALSE, TRUE, FALSE, FALSE
 	.endif
 	.endm
 
@@ -756,29 +739,34 @@
 	@ and an optional event script. When used with an event script you can pass in an optional flag to disable music
 	.macro trainerbattle_double trainer:req, intro_text:req, lose_text:req, not_enough_pkmn_text:req, event_script=FALSE, music=TRUE
 	.if \event_script == FALSE
-	trainerbattle TRAINER_BATTLE_DOUBLE, \trainer, 0, \intro_text, \lose_text, \not_enough_pkmn_text
+	trainerbattle TRAINER_BATTLE_DOUBLE, OBJ_ID_NONE, \trainer, \intro_text, \lose_text, NULL, OBJ_ID_NONE, TRAINER_NONE, NULL, NULL, NULL, NULL, \not_enough_pkmn_text, TRUE, TRUE, FALSE, FALSE
 	.elseif \music == TRUE
-	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE, \trainer, 0, \intro_text, \lose_text, \not_enough_pkmn_text, \event_script
+	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE, OBJ_ID_NONE, \trainer, \intro_text, \lose_text, \event_script, OBJ_ID_NONE, TRAINER_NONE, NULL, NULL, NULL, NULL, \not_enough_pkmn_text, TRUE, TRUE, FALSE, FALSE
 	.else
-	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC, \trainer, 0, \intro_text, \lose_text, \not_enough_pkmn_text, \event_script
+	trainerbattle TRAINER_BATTLE_CONTINUE_SCRIPT_DOUBLE_NO_MUSIC, OBJ_ID_NONE, \trainer, \intro_text, \lose_text, \event_script, OBJ_ID_NONE, TRAINER_NONE, NULL, NULL, NULL, NULL, \not_enough_pkmn_text, TRUE, FALSE, FALSE, FALSE
 	.endif
 	.endm
 
 	@ Starts a rematch battle. Takes a trainer, intro text and loss text
 	.macro trainerbattle_rematch trainer:req, intro_text:req, lose_text:req
-	trainerbattle TRAINER_BATTLE_REMATCH, \trainer, 0, \intro_text, \lose_text
+	trainerbattle TRAINER_BATTLE_REMATCH, OBJ_ID_NONE, \trainer, \intro_text, \lose_text, NULL, OBJ_ID_NONE, TRAINER_NONE, NULL, NULL, NULL, NULL, NULL, FALSE, TRUE, FALSE, TRUE
 	.endm
 
 	@ Starts a rematch double battle. Takes a trainer, intro text, loss text, and text for when you have too few pokemon
 	.macro trainerbattle_rematch_double trainer:req, intro_text:req, lose_text:req, not_enough_pkmn_text:req
-	trainerbattle TRAINER_BATTLE_REMATCH_DOUBLE, \trainer, 0, \intro_text, \lose_text, \not_enough_pkmn_text
+	trainerbattle TRAINER_BATTLE_REMATCH_DOUBLE, OBJ_ID_NONE, \trainer, \intro_text, \lose_text, NULL, OBJ_ID_NONE, TRAINER_NONE, NULL, NULL, NULL, NULL, \not_enough_pkmn_text, FALSE, TRUE, FALSE, TRUE
 	.endm
 
 	@ Starts a trainer battle, skipping intro text. Takes a trainer and loss text
 	.macro trainerbattle_no_intro trainer:req, lose_text:req
-	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, \trainer, 0, \lose_text
+	trainerbattle TRAINER_BATTLE_SINGLE_NO_INTRO_TEXT, OBJ_ID_NONE, \trainer, NULL, \lose_text, NULL, OBJ_ID_NONE, TRAINER_NONE, NULL, NULL, NULL, NULL, NULL, FALSE, TRUE, FALSE, FALSE
 	.endm
 
+	@ Starts a double battle with the player against two trainers
+	@ Takes two trainers and defeat text for each
+	.macro trainerbattle_two_trainers trainer_a:req, lose_text_a:req, trainer_b:req, lose_text_b:req
+	trainerbattle TRAINER_BATTLE_TWO_TRAINERS_NO_INTRO, OBJ_ID_NONE, \trainer_a, NULL, \lose_text_a, NULL, OBJ_ID_NONE, \trainer_b, NULL, \lose_text_b, NULL, NULL, NULL, FALSE, TRUE, FALSE, FALSE
+	.endm
 
 	@ Starts a trainer battle using the battle information stored in RAM (usually by the scripts in trainer_battle.inc, which
 	@ are run by trainerbattle), and blocks script execution until the battle finishes.
@@ -987,16 +975,128 @@
 	.byte \textTop
 	.endm
 
-	@ Gives the player a Pokémon of the specified species and level, holding the specified item. The trailing 0s are unused parameters.
+	@ Gives the player a Pokémon of the specified species and level, and allows to customize extra parameters.
 	@ VAR_RESULT will be set to MON_GIVEN_TO_PARTY, MON_GIVEN_TO_PC, or MON_CANT_GIVE depending on the outcome.
-	.macro givemon species:req, level:req, item=ITEM_NONE
-	.byte SCR_OP_GIVEMON
-	.2byte \species
-	.byte \level
-	.2byte \item
-	.4byte 0
-	.4byte 0
+	.macro givemon species:req, level:req, item, ball, nature, abilityNum, gender, hpEv, atkEv, defEv, speedEv, spAtkEv, spDefEv, hpIv, atkIv, defIv, speedIv, spAtkIv, spDefIv, move1, move2, move3, move4, isShiny, gmaxFactor, teraType, dmaxLevel
+	callnative ScrCmd_createmon, requests_effects=1
 	.byte 0
+	.byte PARTY_SIZE @ assign to first empty slot
+	.set givemon_flags, 0
+	.2byte \species
+	.2byte \level
+	.ifnb \item; .set givemon_flags, givemon_flags | (1 << 0); .endif
+	.ifnb \ball; .set givemon_flags, givemon_flags | (1 << 1); .endif
+	.ifnb \nature; .set givemon_flags, givemon_flags | (1 << 2); .endif
+	.ifnb \abilityNum; .set givemon_flags, givemon_flags | (1 << 3); .endif
+	.ifnb \gender; .set givemon_flags, givemon_flags | (1 << 4); .endif
+	.ifnb \hpEv; .set givemon_flags, givemon_flags | (1 << 5); .endif
+	.ifnb \atkEv; .set givemon_flags, givemon_flags | (1 << 6); .endif
+	.ifnb \defEv; .set givemon_flags, givemon_flags | (1 << 7); .endif
+	.ifnb \speedEv; .set givemon_flags, givemon_flags | (1 << 8); .endif
+	.ifnb \spAtkEv; .set givemon_flags, givemon_flags | (1 << 9); .endif
+	.ifnb \spDefEv; .set givemon_flags, givemon_flags | (1 << 10); .endif
+	.ifnb \hpIv; .set givemon_flags, givemon_flags | (1 << 11); .endif
+	.ifnb \atkIv; .set givemon_flags, givemon_flags | (1 << 12); .endif
+	.ifnb \defIv; .set givemon_flags, givemon_flags | (1 << 13); .endif
+	.ifnb \speedIv; .set givemon_flags, givemon_flags | (1 << 14); .endif
+	.ifnb \spAtkIv; .set givemon_flags, givemon_flags | (1 << 15); .endif
+	.ifnb \spDefIv; .set givemon_flags, givemon_flags | (1 << 16); .endif
+	.ifnb \move1; .set givemon_flags, givemon_flags | (1 << 17); .endif
+	.ifnb \move2; .set givemon_flags, givemon_flags | (1 << 18); .endif
+	.ifnb \move3; .set givemon_flags, givemon_flags | (1 << 19); .endif
+	.ifnb \move4; .set givemon_flags, givemon_flags | (1 << 20); .endif
+	.ifnb \isShiny; .set givemon_flags, givemon_flags | (1 << 21); .endif
+	.ifnb \gmaxFactor; .set givemon_flags, givemon_flags | (1 << 22); .endif
+	.ifnb \teraType; .set givemon_flags, givemon_flags | (1 << 23); .endif
+	.ifnb \dmaxLevel; .set givemon_flags, givemon_flags | (1 << 24); .endif
+	.4byte givemon_flags
+	.ifnb \item; .2byte \item; .endif
+	.ifnb \ball; .2byte \ball; .endif
+	.ifnb \nature; .2byte \nature; .endif
+	.ifnb \abilityNum; .2byte \abilityNum; .endif
+	.ifnb \gender; .2byte \gender; .endif
+	.ifnb \hpEv; .2byte \hpEv; .endif
+	.ifnb \atkEv; .2byte \atkEv; .endif
+	.ifnb \defEv; .2byte \defEv; .endif
+	.ifnb \speedEv; .2byte \speedEv; .endif
+	.ifnb \spAtkEv; .2byte \spAtkEv; .endif
+	.ifnb \spDefEv; .2byte \spDefEv; .endif
+	.ifnb \hpIv; .2byte \hpIv; .endif
+	.ifnb \atkIv; .2byte \atkIv; .endif
+	.ifnb \defIv; .2byte \defIv; .endif
+	.ifnb \speedIv; .2byte \speedIv; .endif
+	.ifnb \spAtkIv; .2byte \spAtkIv; .endif
+	.ifnb \spDefIv; .2byte \spDefIv; .endif
+	.ifnb \move1; .2byte \move1; .endif
+	.ifnb \move2; .2byte \move2; .endif
+	.ifnb \move3; .2byte \move3; .endif
+	.ifnb \move4; .2byte \move4; .endif
+	.ifnb \isShiny; .2byte \isShiny; .endif
+	.ifnb \gmaxFactor; .2byte \gmaxFactor; .endif
+	.ifnb \teraType; .2byte \teraType; .endif
+	.ifnb \dmaxLevel; .2byte \dmaxLevel; .endif
+	.endm
+
+	@ creates a mon for a given party and slot
+	@ otherwise
+	.macro createmon side:req, slot:req, species:req, level:req, item, ball, nature, abilityNum, gender, hpEv, atkEv, defEv, speedEv, spAtkEv, spDefEv, hpIv, atkIv, defIv, speedIv, spAtkIv, spDefIv, move1, move2, move3, move4, isShiny, gmaxFactor, teraType, dmaxLevel
+	callnative ScrCmd_createmon, requests_effects=1
+	.byte \side	 @ 0 - player, 1 - opponent
+	.byte \slot	 @ 0-5
+	.set givemon_flags, 0
+	.2byte \species
+	.2byte \level
+	.ifnb \item; .set givemon_flags, givemon_flags | (1 << 0); .endif
+	.ifnb \ball; .set givemon_flags, givemon_flags | (1 << 1); .endif
+	.ifnb \nature; .set givemon_flags, givemon_flags | (1 << 2); .endif
+	.ifnb \abilityNum; .set givemon_flags, givemon_flags | (1 << 3); .endif
+	.ifnb \gender; .set givemon_flags, givemon_flags | (1 << 4); .endif
+	.ifnb \hpEv; .set givemon_flags, givemon_flags | (1 << 5); .endif
+	.ifnb \atkEv; .set givemon_flags, givemon_flags | (1 << 6); .endif
+	.ifnb \defEv; .set givemon_flags, givemon_flags | (1 << 7); .endif
+	.ifnb \speedEv; .set givemon_flags, givemon_flags | (1 << 8); .endif
+	.ifnb \spAtkEv; .set givemon_flags, givemon_flags | (1 << 9); .endif
+	.ifnb \spDefEv; .set givemon_flags, givemon_flags | (1 << 10); .endif
+	.ifnb \hpIv; .set givemon_flags, givemon_flags | (1 << 11); .endif
+	.ifnb \atkIv; .set givemon_flags, givemon_flags | (1 << 12); .endif
+	.ifnb \defIv; .set givemon_flags, givemon_flags | (1 << 13); .endif
+	.ifnb \speedIv; .set givemon_flags, givemon_flags | (1 << 14); .endif
+	.ifnb \spAtkIv; .set givemon_flags, givemon_flags | (1 << 15); .endif
+	.ifnb \spDefIv; .set givemon_flags, givemon_flags | (1 << 16); .endif
+	.ifnb \move1; .set givemon_flags, givemon_flags | (1 << 17); .endif
+	.ifnb \move2; .set givemon_flags, givemon_flags | (1 << 18); .endif
+	.ifnb \move3; .set givemon_flags, givemon_flags | (1 << 19); .endif
+	.ifnb \move4; .set givemon_flags, givemon_flags | (1 << 20); .endif
+	.ifnb \isShiny; .set givemon_flags, givemon_flags | (1 << 21); .endif
+	.ifnb \gmaxFactor; .set givemon_flags, givemon_flags | (1 << 22); .endif
+	.ifnb \teraType; .set givemon_flags, givemon_flags | (1 << 23); .endif
+	.ifnb \dmaxLevel; .set givemon_flags, givemon_flags | (1 << 24); .endif
+	.4byte givemon_flags
+	.ifnb \item; .2byte \item; .endif
+	.ifnb \ball; .2byte \ball; .endif
+	.ifnb \nature; .2byte \nature; .endif
+	.ifnb \abilityNum; .2byte \abilityNum; .endif
+	.ifnb \gender; .2byte \gender; .endif
+	.ifnb \hpEv; .2byte \hpEv; .endif
+	.ifnb \atkEv; .2byte \atkEv; .endif
+	.ifnb \defEv; .2byte \defEv; .endif
+	.ifnb \speedEv; .2byte \speedEv; .endif
+	.ifnb \spAtkEv; .2byte \spAtkEv; .endif
+	.ifnb \spDefEv; .2byte \spDefEv; .endif
+	.ifnb \hpIv; .2byte \hpIv; .endif
+	.ifnb \atkIv; .2byte \atkIv; .endif
+	.ifnb \defIv; .2byte \defIv; .endif
+	.ifnb \speedIv; .2byte \speedIv; .endif
+	.ifnb \spAtkIv; .2byte \spAtkIv; .endif
+	.ifnb \spDefIv; .2byte \spDefIv; .endif
+	.ifnb \move1; .2byte \move1; .endif
+	.ifnb \move2; .2byte \move2; .endif
+	.ifnb \move3; .2byte \move3; .endif
+	.ifnb \move4; .2byte \move4; .endif
+	.ifnb \isShiny; .2byte \isShiny; .endif
+	.ifnb \gmaxFactor; .2byte \gmaxFactor; .endif
+	.ifnb \teraType; .2byte \teraType; .endif
+	.ifnb \dmaxLevel; .2byte \dmaxLevel; .endif
 	.endm
 
 	@ Gives the player an Egg of the specified species.
@@ -1357,7 +1457,7 @@
 	@ The specified id can be used to refer to the sprite again later with turnvobject.
 	.macro createvobject graphicsId:req, id:req, x:req, y:req, elevation=3, direction=DIR_SOUTH
 	.byte SCR_OP_CREATEVOBJECT
-	.byte \graphicsId
+	.2byte \graphicsId
 	.byte \id
 	.2byte \x
 	.2byte \y
@@ -1440,13 +1540,19 @@
 	.2byte \count
 	.endm
 
-	@ Prepares to start a wild battle against a 'species' at 'level' holding 'item'. Running this command will not affect
-	@ normal wild battles. You start the prepared battle with dowildbattle.
-	.macro setwildbattle species:req, level:req, item=ITEM_NONE
+	@ Prepares to start a wild battle against a 'species' at 'level' holding 'item'.
+	@ If 'species2' is something other than SPECIES_NONE, then the battle is a double battle
+	@ that is also against 'species2' at 'level2' holding 'item2'.
+	@ Running this command will not affect normal wild battles. You start the prepared battle with dowildbattle.
+	@ If the player only has one Pokemon, a scripted double battle will be buggy.
+	.macro setwildbattle species:req, level:req, item=ITEM_NONE, species2=SPECIES_NONE, level2=0, item2=ITEM_NONE
 	.byte SCR_OP_SETWILDBATTLE
 	.2byte \species
 	.byte \level
 	.2byte \item
+	.2byte \species2
+	.byte \level2
+	.2byte \item2
 	.endm
 
 	@ Starts a wild battle against the Pokemon generated by setwildbattle. Blocks script execution until the battle finishes.
@@ -1684,7 +1790,7 @@
 	.4byte \text
 	.endm
 
-	@ Equivalent to fadescreen but copies gPlttBufferUnfaded to gPaletteDecompressionBuffer on the fade out
+	@ Equivalent to fadescreen but copies gPlttBufferUnfaded to an allocated buffer on the fade out
 	@ and the reverse on the fade in, in effect saving gPlttBufferUnfaded to restore it.
 	.macro fadescreenswapbuffers mode:req
 	.byte SCR_OP_FADESCREENSWAPBUFFERS
@@ -1739,6 +1845,37 @@
 	.2byte \quantity
 	.endm
 
+	.macro _dynmultichoice left:req, top:req, ignoreBPress:req, maxBeforeScroll:req, shouldSort:req, initialSelected:req, callbacks:req argv:vararg
+	.byte SCR_OP_DYNMULTICHOICE
+	.2byte \left
+	.2byte \top
+	.byte \ignoreBPress
+	.byte \maxBeforeScroll
+	.byte \shouldSort
+	.2byte \initialSelected
+	.byte \callbacks
+	.byte (.Ldynmultichoice_\@_2 - .Ldynmultichoice_\@_1) / 4
+.Ldynmultichoice_\@_1:
+	.4byte \argv
+.Ldynmultichoice_\@_2:
+	.endm
+
+	@ Displays a multichoice box from which the user can choose a selection, and blocks script execution until a selection is made.
+	@ Lists of options are provided in argv.
+	@ If ignoreBPress is set to a non-zero value, then the user will not be allowed to back out of the multichoice with the B button.
+	.macro dynmultichoice left:req, top:req, ignoreBPress:req, maxBeforeScroll:req, initialSelected:req, callbacks:req argv:vararg
+	_dynmultichoice \left, \top, \ignoreBPress, \maxBeforeScroll, FALSE, \initialSelected, \callbacks, \argv
+	.endm
+
+	.macro dynmultipush name:req, id:req
+	.byte SCR_OP_DYNMULTIPUSH
+	.4byte \name
+	.2byte \id
+	.endm
+
+	.macro dynmultistack left:req, top:req, ignoreBPress:req, maxBeforeScroll:req, shouldSort:req, initialSelected:req, callbacks:req
+	_dynmultichoice \left, \top, \ignoreBPress, \maxBeforeScroll, \shouldSort, \initialSelected, \callbacks, NULL
+	.endm
 
 @ Supplementary
 
@@ -1948,4 +2085,428 @@
 	setvar VAR_0x8005, \level
 	setvar VAR_0x8006, \item
 	special CreateEnemyEventMon
+	.endm
+
+	.macro setdynamicaifunc func:req
+	callnative ScriptSetDynamicAiFunc, requests_effects=1
+	.4byte \func
+	.endm
+
+	@ Set up a totem boost for the next battle.
+	@ 'battler' is the position of the mon you want to gain a boost. see B_POSITION_xx in include/constants/battle.h.
+	@ The rest of the arguments are the stat change values to each stat.
+	@ For example, giving the first opponent +1 to atk and -2 to speed would be: settotemboost B_POSITION_OPPONENT_LEFT, 1, 0, -2
+	.macro settotemboost battler:req, atk=0,def=0,speed=0,spatk=0,spdef=0,acc=0,evas=0
+	callnative ScriptSetTotemBoost, requests_effects=1
+	.2byte \battler
+	.2byte \atk
+	.2byte \def
+	.2byte \speed
+	.2byte \spatk
+	.2byte \spdef
+	.2byte \acc
+	.2byte \evas
+	.endm
+
+	@ useful totem boost macros
+	.macro totemboost_atk1 battler:req
+	settotemboost \battler, 1
+	.endm
+	.macro totemboost_def1 battler:req
+	settotemboost \battler, 0, 1
+	.endm
+	.macro totemboost_speed1 battler:req
+	settotemboost \battler, 0, 0, 1
+	.endm
+	.macro totemboost_spatk1 battler:req
+	settotemboost \battler, 0, 0, 0, 1
+	.endm
+	.macro totemboost_spdef1 battler:req
+	settotemboost \battler, 0, 0, 0, 0, 1
+	.endm
+	.macro totemboost_acc1 battler:req
+	settotemboost \battler, 0, 0, 0, 0, 0, 1
+	.endm
+	.macro totemboost_evas1 battler:req
+	settotemboost \battler, 0, 0, 0, 0, 0, 0, 1
+	.endm
+
+	.macro totemboost_atk2 battler:req
+	settotemboost \battler, 2
+	.endm
+	.macro totemboost_def2 battler:req
+	settotemboost \battler, 0, 2
+	.endm
+	.macro totemboost_speed2 battler:req
+	settotemboost \battler, 0, 0, 2
+	.endm
+	.macro totemboost_spatk2 battler:req
+	settotemboost \battler, 0, 0, 0, 2
+	.endm
+	.macro totemboost_spdef2 battler:req
+	settotemboost \battler, 0, 0, 0, 0, 2
+	.endm
+	.macro totemboost_acc2 battler:req
+	settotemboost \battler, 0, 0, 0, 0, 0, 2
+	.endm
+	.macro totemboost_evas2 battler:req
+	settotemboost \battler, 0, 0, 0, 0, 0, 0, 2
+	.endm
+
+	@ Attempts to trigger a special evolution method in the overworld.
+	@ There may be other conditions required which are coded for in GetEvolutionTargetSpecies.
+	@ EX: tryspecialevo EVO_WATER_SCROLL, FALSE, FALSE triggers Kubfu's EVO_WATER_SCROLL evolution
+	@ 	  method, cannot be cancelled in the evolution scene, and will only evolve one Kubfu if there
+	@	  are multiple in the player's party.
+	.macro tryspecialevo evoMethod:req, canStopEvo=TRUE, tryMultiple=TRUE
+	setvar VAR_0x8000, \evoMethod
+	setvar VAR_0x8001, \canStopEvo
+	setvar VAR_0x8002, \tryMultiple
+	special TrySpecialOverworldEvo
+	.endm
+
+	.macro ai_vs_ai_battle trainer1:req, trainer2:req
+	setflag B_FLAG_AI_VS_AI_BATTLE
+	setvar VAR_0x8004, \trainer1
+	callnative CreateTrainerPartyForPlayer, requests_effects=1
+	trainerbattle_no_intro \trainer2, NULL
+	.endm
+
+	@ Sets VAR_RESULT to TRUE if stat can be hyper trained, or to
+	@ FALSE otherwise.
+	.macro canhypertrain stat:req, slot:req
+	callnative CanHyperTrain, requests_effects=1
+	.byte \stat
+	.2byte \slot
+	.endm
+
+	@ Hyper Trains a stat.
+	.macro hypertrain stat:req, slot:req
+	callnative HyperTrain, requests_effects=1
+	.byte \stat
+	.2byte \slot
+	.endm
+
+	@ Sets VAR_RESULT to TRUE if the Pokemon has the Gigantamax Factor,
+	@ or to FALSE otherwise.
+	.macro hasgigantamaxfactor slot:req
+	callnative HasGigantamaxFactor, requests_effects=1
+	.2byte \slot
+	.endm
+
+	@ Toggles the Gigantamax Factor for a Pokemon.
+	@ Fails for Melmetal (vanilla behavior).
+	@ Sets VAR_RESULT to TRUE if it succeeds, and FALSE otherwise.
+	.macro togglegigantamaxfactor slot:req
+	callnative ToggleGigantamaxFactor, requests_effects=1
+	.2byte \slot
+	.endm
+
+	@ Sets VAR_RESULT to one of the arguments (via setorcopyvar).
+	.macro randomelement element:req, elements:vararg
+	.set _randomelement_n, 0
+	.irp el, \element, \elements
+	.set _randomelement_n, _randomelement_n + 1
+	.endr
+		random _randomelement_n
+
+	.set _randomelement_n, 0
+	.irp el, \element, \elements
+		goto_if_ne VAR_RESULT, _randomelement_n, 1f
+		setorcopyvar VAR_RESULT, \el
+		goto 2f
+	1:
+	.set _randomelement_n, _randomelement_n + 1
+	.endr
+	2:
+	.endm
+
+	@ Sets VAR_RESULT to TRUE with probability 'percent', and FALSE
+	@ with probability '100% - percent'.
+	.macro randompercentage percent:req
+		random 100
+		goto_if_lt VAR_RESULT, \percent, 1f
+		setvar VAR_RESULT, FALSE
+		goto 2f
+	1:
+		setvar VAR_RESULT, TRUE
+	2:
+	.endm
+
+	@ Inflicts \status1 to the Pokémon in \slot.
+	@ If \slot is greater or equal than PARTY_SIZE, the status is inflicted on each of the Player's Pokémon.
+	.macro setstatus1 status1:req, slot:req
+	callnative Script_SetStatus1, requests_effects=1
+	.2byte \status1
+	.2byte \slot
+	.endm
+
+	@ Sets VAR_RESULT to the Pokémon in \slot's Tera Type
+	.macro checkteratype slot:req
+	callnative CheckTeraType, requests_effects=1
+	.2byte \slot
+	.endm
+
+	@ Sets the Pokémon in \slot's Tera Type
+	.macro setteratype type:req, slot:req
+	callnative SetTeraType, requests_effects=1
+	.byte \type
+	.2byte \slot
+	.endm
+
+	@ Saves species and forms of Daycare Pokémon to specific vars. Saves the amount of Daycare mon to VAR_RESULT.
+	.macro getdaycaregfx varSpecies1:req varSpecies2:req varForm1:req varForm2:req
+	callnative GetDaycareGraphics, requests_effects=1
+	.2byte \varSpecies1
+	.2byte \varSpecies2
+	.2byte \varForm1
+	.2byte \varForm2
+	.endm
+
+	@ Plays the cry of the first alive party member.
+	.macro playfirstmoncry
+	callnative PlayFirstMonCry, requests_effects=1
+	.endm
+
+	@ Buffers the nickname of the first alive party member.
+	.macro bufferlivemonnickname out:req
+	callnative BufferFirstLiveMonNickname, requests_effects=1
+	.byte \out
+	.endm
+
+	@ Executes Follower actions
+	.macro getfolloweraction
+	callnative GetFollowerAction
+	.endm
+
+	@ Checks if Field move is being used by the current follower.
+	.macro isfollowerfieldmoveuser var:req
+	callnative IsFollowerFieldMoveUser, requests_effects=1
+	.2byte \var
+	.endm
+
+	@ Saves the direction from where source object event would need to turn to to face the target into the specified var.
+	.macro getdirectiontoface var:req, sourceId:req, targetId:req
+	callnative GetDirectionToFaceScript, requests_effects=1
+	.2byte \var
+	.byte \sourceId
+	.byte \targetId
+	.endm
+
+	@ set the wild double battle flag
+	@ can be used in conjunection with createmon to set up a wild battle with 2 player mons vs. 1 enemy mon
+	.macro setwilddoubleflag
+	callnative ScriptSetDoubleBattleFlag, requests_effects=1
+	.endm
+
+	@ When OW_USE_FAKE_RTC and OW_FLAG_PAUSE_TIME is assigned, this macro will stop the flow of time.
+	.macro pausefakertc
+	callnative Script_PauseFakeRtc, requests_effects=1
+	.endm
+
+	@ When OW_USE_FAKE_RTC and OW_FLAG_PAUSE_TIME is assigned, this macro will resume the flow of time.
+	.macro resumefakertc
+	callnative Script_ResumeFakeRtc, requests_effects=1
+	.endm
+
+	@ When OW_USE_FAKE_RTC and OW_FLAG_PAUSE_TIME is assigned, this macro will resume the flow of time if paused, and stop the flow of time otherwise.
+	.macro togglefakertc
+	callnative Script_ToggleFakeRtc, requests_effects=1
+	.endm
+
+	@ ============================ @
+	@ ITEM DESCRIPTION HEADER MACROS
+	@ Used with OW_SHOW_ITEM_DESCRIPTIONS config
+	.macro showitemdescription
+	callnative ScriptShowItemDescription, requests_effects=1
+	.byte 0
+	.endm
+
+	.macro showberrydescription
+	callnative ScriptShowItemDescription, requests_effects=1
+	.byte 1
+	.endm
+
+	.macro hideitemdescription
+	callnative ScriptHideItemDescription, requests_effects=1
+	.endm
+
+	@ Remove all of specified item from the player's bag and return the number of removed items to VAR_RESULT
+	.macro removeallitem itemId:req
+	callnative ScrCmd_removeallitem, requests_effects=1
+	.2byte \itemId
+	.endm
+
+	@ Stores the position of the given object in destX and destY. Mode CURRENT_POSITION will take the object's current position. Mode TEMPLATE_POSITION will take the object's template position.
+	.macro getobjectxy localId:req, posType:req, destX:req, destY:req
+	callnative ScrCmd_getobjectxy, requests_effects=1
+	.2byte \localId
+	.2byte \posType
+	.2byte \destX
+	.2byte \destY
+	.endm
+
+	.macro getobjecttemplatexy localId:req, posType = TEMPLATE_POSITION, destX:req, destY:req
+	callnative ScrCmd_getobjectxy, requests_effects=1
+	.2byte \localId
+	.2byte \posType
+	.2byte \destX
+	.2byte \destY
+	.endm
+
+	.macro getobjectcurrentxy localId:req, posType = CURRENT_POSITION, destX:req, destY:req
+	callnative ScrCmd_getobjectxy, requests_effects=1
+	.2byte \localId
+	.2byte \posType
+	.2byte \destX
+	.2byte \destY
+	.endm
+
+	@ Return TRUE to dest if there is an object at the position x and y.
+	.macro checkobjectat x:req, y:req, dest = VAR_RESULT
+	callnative ScrCmd_checkobjectat, requests_effects=1
+	.2byte \x
+	.2byte \y
+	.2byte \dest
+	.endm
+
+	@ Returns the state of the Pokedex Seen Flag to VAR_RESULT for the Pokemon with speciesId
+	.macro getseenmon species:req
+	callnative Scrcmd_getsetpokedexflag, requests_effects=1
+	.2byte \species
+	.2byte FLAG_GET_SEEN
+	.endm
+
+	@ Returns the state of the Pokedex Caught Flag to VAR_RESULT for the Pokemon with speciesId
+	.macro getcaughtmon species:req
+	callnative Scrcmd_getsetpokedexflag, requests_effects=1
+	.2byte \species
+	.2byte FLAG_GET_CAUGHT
+	.endm
+
+	@ Sets the Pokedex Seen Flag for the Pokemon with speciesId
+	.macro setseenmon species:req
+	callnative Scrcmd_getsetpokedexflag, requests_effects=1
+	.2byte \species
+	.2byte FLAG_SET_SEEN
+	.endm
+
+	@ Sets the Pokedex Caught Flag for the Pokemon with speciesId
+	.macro setcaughtmon species:req
+	callnative Scrcmd_getsetpokedexflag, requests_effects=1
+	.2byte \species
+	.2byte FLAG_SET_CAUGHT
+	.endm
+
+	@ Check if the Player has speciesId in their party. OPEN_PARTY_SCREEN will have the player select a mon from their party. NO_PARTY_SCREEN will automatically check every mon in the player's party.
+	.macro checkspecies speciesId:req, mode=NO_PARTY_SCREEN
+	.if \mode == OPEN_PARTY_SCREEN
+		special ChoosePartyMon
+		waitstate
+		callnative Scrcmd_checkspecies_choose, requests_effects=1
+		.2byte \speciesId
+	.else
+		callnative Scrcmd_checkspecies, requests_effects=1
+		.2byte \speciesId
+	.endif
+	.endm
+
+	.macro checkspecies_choose speciesId:req
+	checkspecies \speciesId, OPEN_PARTY_SCREEN
+	.endm
+
+	@ Gets the facing direction of a given event object and stores it in the variable dest.
+	.macro getobjectfacingdirection localId:req, dest:req
+	callnative Scrcmd_getobjectfacingdirection, requests_effects=1
+	.2byte \localId
+	.2byte \dest
+	.endm
+
+	@ Hides any follower Pokémon if present, putting them into their Poké Ball; by default waits for their movement to finish.
+	.macro hidefollower wait=1
+	callnative ScrFunc_hidefollower
+	.2byte \wait
+	.endm
+
+	.macro increasedifficulty
+	callnative Script_IncreaseDifficulty, requests_effects=1
+	.endm
+
+	.macro decreasedifficulty
+	callnative Script_DecreaseDifficulty, requests_effects=1
+	.endm
+
+	.macro getdifficulty var:req
+	callnative Script_GetDifficulty, requests_effects=1
+	.endm
+
+	.macro setdifficulty difficulty:req
+	callnative Script_SetDifficulty, requests_effects=1
+	.byte \difficulty
+	.endm
+    
+	.macro forcesave
+	callnative Script_ForceSaveGame
+	waitstate
+	.endm
+
+	@ Makes the trainer unable to see the player if executed.
+	@ This is a no-op if the player interacts with the trainer.
+	.macro cant_see_if, condition:req
+	callnative Script_EndTrainerCanSeeIf, requests_effects=1
+	.byte \condition
+	.endm
+
+	.macro cant_see
+	cant_see_if_unset 0 @ flag 0 is always FALSE.
+	.endm
+
+	.macro cant_see_if_unset, flag:req
+	checkflag \flag
+	cant_see_if FALSE
+	.endm
+
+	.macro cant_see_if_set, flag:req
+	checkflag \flag
+	cant_see_if TRUE
+	.endm
+
+	.macro cant_see_if_trainerflag_unset, trainer:req
+	checktrainerflag \trainer
+	cant_see_if FALSE
+	.endm
+
+	.macro cant_see_if_trainerflag_set, trainer:req
+	checktrainerflag \trainer
+	cant_see_if TRUE
+	.endm
+
+	.macro cant_see_if_lt, a:req, b:req
+	compare \a, \b
+	cant_see_if 0
+	.endm
+
+	.macro cant_see_if_eq, a:req, b:req
+	compare \a, \b
+	cant_see_if 1
+	.endm
+
+	.macro cant_see_if_gt, a:req, b:req
+	compare \a, \b
+	cant_see_if 2
+	.endm
+
+	.macro cant_see_if_le, a:req, b:req
+	compare \a, \b
+	cant_see_if 3
+	.endm
+
+	.macro cant_see_if_ge, a:req, b:req
+	compare \a, \b
+	cant_see_if 4
+	.endm
+
+	.macro cant_see_if_ne, a:req, b:req
+	compare \a, \b
+	cant_see_if 5
 	.endm

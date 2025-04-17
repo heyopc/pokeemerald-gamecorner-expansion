@@ -878,13 +878,8 @@ static void CreateHighlight(u8 num, u8 row)
 {
 	if ((sBlockStacker->HighlightSpriteIds[num] == 0) && (sBlockStacker->HighlightRow != 8))
 	{	
-			struct SpriteSheet s;
 			LoadSpritePalettes(sSpritePalettes);
-			LZ77UnCompWram(sSpriteSheet_Highlight.data, gDecompressionBuffer);
-			s.data = gDecompressionBuffer;
-			s.size = sSpriteSheet_Highlight.size;
-			s.tag = HIGHLIGHT_GFXTAG;
-			LoadSpriteSheet(&s);
+			LoadCompressedSpriteSheet(&sSpriteSheet_Highlight);
 		if (num < 7)
 		{
 			sBlockStacker->HighlightSpriteIds[num] = CreateSprite(&sSpriteTemplate_Highlight, 32 + (16 * num), 136 - (16 * row), 1);
@@ -932,136 +927,83 @@ static void DestroyHighlights(void)
 
 static void SwapFromBlock(void)
 {
-		struct SpriteSheet s;
 		DestroySpriteAndFreeResources(&gSprites[sBlockStacker->Rhydon2SpriteId]);
 		DestroySpriteAndFreeResources(&gSprites[sBlockStacker->RhydonBlockSpriteId]);
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Rhydon.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Rhydon.size;
-		s.tag = RHYDON_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Rhydon);
 	
 	sBlockStacker->RhydonSpriteId = CreateSprite(&sSpriteTemplate_Rhydon, 183, 112, 0);
 }
 
 static void SwapToBlock(void)
 {
-		struct SpriteSheet s;
 		DestroySpriteAndFreeResources(&gSprites[sBlockStacker->RhydonSpriteId]);
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Rhydon2.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Rhydon2.size;
-		s.tag = RHYDON2_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Rhydon2);
 	
 	sBlockStacker->Rhydon2SpriteId = CreateSprite(&sSpriteTemplate_Rhydon2, 183, 112, 0);
 	
-		LZ77UnCompWram(sSpriteSheet_RhydonBlock.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_RhydonBlock.size;
-		s.tag = RHYDONBLOCK_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_RhydonBlock);
 		
 	sBlockStacker->RhydonBlockSpriteId = CreateSprite(&sSpriteTemplate_RhydonBlock, 177, 122, 0);
 }
 
 static void CreateRhydon(void)
 {
-		struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Rhydon.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Rhydon.size;
-		s.tag = RHYDON_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Rhydon);
 	
 	sBlockStacker->RhydonSpriteId = CreateSprite(&sSpriteTemplate_Rhydon, 183, 112, 0);
 }
 
 static void CreateArrow(void)
 {
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Arrow.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Arrow.size;
-		s.tag = ARROW_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Arrow);
 	
 	sBlockStacker->ArrowSpriteId = CreateSprite(&sSpriteTemplate_Arrow, 14, 137, 0);
 }
 
 static void CreateCommands(void)
 {
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Commands.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Commands.size;
-		s.tag = COMMANDS_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Commands);
 	
 	sBlockStacker->CommandsSpriteId = CreateSprite(&sSpriteTemplate_Commands, 196, 50, 0);
 }
 
 static void CreateX1(s16 x, s16 y)
 {
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_X.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_X.size;
-		s.tag = X_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_X);
 	
 	sBlockStacker->x1SpriteId = CreateSprite(&sSpriteTemplate_X, x, y, 0);
 }
 
 static void CreateX2(s16 x, s16 y)
 {
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_X.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_X.size;
-		s.tag = X_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_X);
 	
 	sBlockStacker->x2SpriteId = CreateSprite(&sSpriteTemplate_X, x, y, 0);
 }
 
 static void CreateX3(s16 x, s16 y)
 {
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_X.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_X.size;
-		s.tag = X_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_X);
 	
 	sBlockStacker->x3SpriteId = CreateSprite(&sSpriteTemplate_X, x, y, 0);
 }
 
 static void CreateYesNo(void)
 {
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Yes.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Yes.size;
-		s.tag = YES_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Yes);
 	
 	sBlockStacker->YesSpriteId = CreateSprite(&sSpriteTemplate_Yes, 50, 110, 0);
 	
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_No.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_No.size;
-		s.tag = NO_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_No);
 	
 	sBlockStacker->NoSpriteId = CreateSprite(&sSpriteTemplate_No, 104, 110, 0);
 	gSprites[sBlockStacker->NoSpriteId].oam.tileNum += 32;
@@ -1087,13 +1029,8 @@ static void UpdateLives(void)
 
 static void CreateLives(void)
 {
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Lives.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Lives.size;
-		s.tag = LIVES_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Lives);
 	
 	sBlockStacker->LivesSpriteId = CreateSprite(&sSpriteTemplate_Lives, 204, 24, 0);
 	gSprites[sBlockStacker->LivesSpriteId].oam.tileNum += 4;
@@ -1101,39 +1038,24 @@ static void CreateLives(void)
 
 static void CreateKeepGoing(void)
 {
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_KeepGoing.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_KeepGoing.size;
-		s.tag = KEEPGOING_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_KeepGoing);
 	
 	sBlockStacker->KeepGoingSpriteId = CreateSprite(&sSpriteTemplate_KeepGoing, 80, 80, 0);
 }
 
 static void CreateGameOver(void)
 {
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_GameOver.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_GameOver.size;
-		s.tag = GAMEOVER_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_GameOver);
 	
 	sBlockStacker->GameOverSpriteId = CreateSprite(&sSpriteTemplate_GameOver, 80, 80, 0);
 }
 
 static void CreateStart(void)
 {
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Start.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Start.size;
-		s.tag = START_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Start);
 	
 	sBlockStacker->StartSpriteId = CreateSprite(&sSpriteTemplate_Start, 80, 80, 0);
 }
@@ -1158,24 +1080,14 @@ static void DestroyLives(void)
 
 static void CreateWinner(void)
 {
-		struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Winner.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Winner.size;
-		s.tag = WINNER_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Winner);
 	
 	sBlockStacker->WinnerSpriteId = CreateSprite(&sSpriteTemplate_Winner, 80, 80, 0);
 }
 
 static void CreateTitle(void)
 {
-		struct SpriteSheet s;
-        LZ77UnCompWram(sSpriteSheet_Title.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Title.size;
-		s.tag = TITLE_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Title);
 	
 	sBlockStacker->TitleSpriteId = CreateSprite(&sSpriteTemplate_Title, 80, 80, 0);
 }
@@ -1189,13 +1101,8 @@ static void CreateLevel_1(void)
 {
 	u8 LR;
 	
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Block.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Block.size;
-		s.tag = BLOCK_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Block);
 	
 	LR = (Random() % 100);
 	
@@ -1226,13 +1133,8 @@ static void CreateLevel_2(void)
 {
 	u8 LR;
 	
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Block.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Block.size;
-		s.tag = BLOCK_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Block);
 	
 	LR = (Random() % 100);
 	
@@ -1298,13 +1200,8 @@ static void CreateLevel_3(void)
 {
 	u8 LR;
 	
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Block.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Block.size;
-		s.tag = BLOCK_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Block);
 	
 	LR = (Random() % 100);
 	
@@ -1351,13 +1248,8 @@ static void CreateLevel_4(void)
 {
 	u8 LR;
 	
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Block.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Block.size;
-		s.tag = BLOCK_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Block);
 	
 	LR = (Random() % 100);
 	
@@ -1404,13 +1296,8 @@ static void CreateLevel_5(void)
 {
 	u8 LR;
 	
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Block.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Block.size;
-		s.tag = BLOCK_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Block);
 	
 	LR = (Random() % 100);
 	
@@ -1437,13 +1324,8 @@ static void CreateLevel_6(void)
 {
 	u8 LR;
 	
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Block.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Block.size;
-		s.tag = BLOCK_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Block);
 	
 	LR = (Random() % 100);
 	
@@ -1470,13 +1352,8 @@ static void CreateLevel_7(void)
 {
 	u8 LR;
 	
-		struct SpriteSheet s;
-		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Block.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Block.size;
-		s.tag = BLOCK_GFXTAG;
-		LoadSpriteSheet(&s);
+	LoadSpritePalettes(sSpritePalettes);
+    LoadCompressedSpriteSheet(&sSpriteSheet_Block);
 	
 	LR = (Random() % 100);
 	
@@ -1503,13 +1380,8 @@ static void CreateLevel_8(void)
 {
 	u8 LR;
 	
-		struct SpriteSheet s;
 		LoadSpritePalettes(sSpritePalettes);
-        LZ77UnCompWram(sSpriteSheet_Block.data, gDecompressionBuffer);
-		s.data = gDecompressionBuffer;
-		s.size = sSpriteSheet_Block.size;
-		s.tag = BLOCK_GFXTAG;
-		LoadSpriteSheet(&s);
+		LoadCompressedSpriteSheet(&sSpriteSheet_Block);
 	
 	LR = (Random() % 100);
 	

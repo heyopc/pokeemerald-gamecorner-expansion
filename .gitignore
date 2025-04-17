@@ -40,4 +40,9 @@ prefabs.json
 *.sym
 *.js
 /pokeemerald-*.png
-/pokeemerald_modern-*.png
+src/data/map_group_count.h
+tools/trainerproc/trainerproc
+*.Identifier
+*.smol
+*.fastSmol
+*.smolTM

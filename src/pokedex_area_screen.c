@@ -8,6 +8,7 @@
 #include "menu.h"
 #include "overworld.h"
 #include "palette.h"
+#include "pokedex.h"
 #include "pokedex_area_screen.h"
 #include "region_map.h"
 #include "roamer.h"
@@ -106,9 +107,11 @@ static void CreateAreaUnknownSprites(void);
 static void Task_HandlePokedexAreaScreenInput(u8);
 static void ResetPokedexAreaMapBg(void);
 static void DestroyAreaScreenSprites(void);
+static void LoadHGSSScreenSelectBarSubmenu(void);
 
 static const u32 sAreaGlow_Pal[] = INCBIN_U32("graphics/pokedex/area_glow.gbapal");
 static const u32 sAreaGlow_Gfx[] = INCBIN_U32("graphics/pokedex/area_glow.4bpp.lz");
+static const u32 sPokedexPlusHGSS_ScreenSelectBarSubmenu_Tilemap[] = INCBIN_U32("graphics/pokedex/hgss/SelectBar.bin.lz");
 
 static const u16 sSpeciesHiddenFromAreaScreen[] = { SPECIES_WYNAUT };
 
@@ -249,72 +252,67 @@ static void FindMapsWithMon(u16 species)
     if (sPokedexAreaScreen->alteringCaveId >= NUM_ALTERING_CAVE_TABLES)
         sPokedexAreaScreen->alteringCaveId = 0;
 
-    roamer = &gSaveBlock1Ptr->roamer;
-    if (species != roamer->species)
+    sPokedexAreaScreen->numOverworldAreas = 0;
+    sPokedexAreaScreen->numSpecialAreas = 0;
+
+    // Check if this species should be hidden from the area map.
+    // This only applies to Wynaut, to hide the encounters on Mirage Island.
+    for (i = 0; i < ARRAY_COUNT(sSpeciesHiddenFromAreaScreen); i++)
     {
-        sPokedexAreaScreen->numOverworldAreas = 0;
-        sPokedexAreaScreen->numSpecialAreas = 0;
+        if (sSpeciesHiddenFromAreaScreen[i] == species)
+            return;
+    }
 
-        // Check if this species should be hidden from the area map.
-        // This only applies to Wynaut, to hide the encounters on Mirage Island.
-        for (i = 0; i < ARRAY_COUNT(sSpeciesHiddenFromAreaScreen); i++)
+    // Add Pokémon with special encounter circumstances (i.e. not listed
+    // in the regular wild encounter table) to the area map.
+    // This only applies to Feebas on Route 119, but it was clearly set
+    // up to allow handling others.
+    for (i = 0; sFeebasData[i][0] != NUM_SPECIES; i++)
+    {
+        if (species == sFeebasData[i][0])
         {
-            if (sSpeciesHiddenFromAreaScreen[i] == species)
-                return;
-        }
-
-        // Add Pokémon with special encounter circumstances (i.e. not listed
-        // in the regular wild encounter table) to the area map.
-        // This only applies to Feebas on Route 119, but it was clearly set
-        // up to allow handling others.
-        for (i = 0; sFeebasData[i][0] != NUM_SPECIES; i++)
-        {
-            if (species == sFeebasData[i][0])
+            switch (sFeebasData[i][1])
             {
-                switch (sFeebasData[i][1])
-                {
-                case MAP_GROUP_TOWNS_AND_ROUTES:
-                    SetAreaHasMon(sFeebasData[i][1], sFeebasData[i][2]);
-                    break;
-                case MAP_GROUP_DUNGEONS:
-                case MAP_GROUP_SPECIAL_AREA:
-                    SetSpecialMapHasMon(sFeebasData[i][1], sFeebasData[i][2]);
-                    break;
-                }
-            }
-        }
-
-        // Add regular species to the area map
-        for (i = 0; gWildMonHeaders[i].mapGroup != MAP_GROUP(UNDEFINED); i++)
-        {
-            if (MapHasSpecies(&gWildMonHeaders[i], species))
-            {
-                switch (gWildMonHeaders[i].mapGroup)
-                {
-                case MAP_GROUP_TOWNS_AND_ROUTES:
-                    SetAreaHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
-                    break;
-                case MAP_GROUP_DUNGEONS:
-                case MAP_GROUP_SPECIAL_AREA:
-                    SetSpecialMapHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
-                    break;
-                }
+            case MAP_GROUP_TOWNS_AND_ROUTES:
+                SetAreaHasMon(sFeebasData[i][1], sFeebasData[i][2]);
+                break;
+            case MAP_GROUP_DUNGEONS:
+            case MAP_GROUP_SPECIAL_AREA:
+                SetSpecialMapHasMon(sFeebasData[i][1], sFeebasData[i][2]);
+                break;
             }
         }
     }
-    else
+
+    // Add regular species to the area map
+    for (i = 0; gWildMonHeaders[i].mapGroup != MAP_GROUP(UNDEFINED); i++)
     {
-        // This is the roamer's species, show where the roamer is currently
-        sPokedexAreaScreen->numSpecialAreas = 0;
-        if (roamer->active)
+        if (MapHasSpecies(&gWildMonHeaders[i], species))
         {
-            GetRoamerLocation(&sPokedexAreaScreen->overworldAreasWithMons[0].mapGroup, &sPokedexAreaScreen->overworldAreasWithMons[0].mapNum);
-            sPokedexAreaScreen->overworldAreasWithMons[0].regionMapSectionId = Overworld_GetMapHeaderByGroupAndId(sPokedexAreaScreen->overworldAreasWithMons[0].mapGroup, sPokedexAreaScreen->overworldAreasWithMons[0].mapNum)->regionMapSectionId;
-            sPokedexAreaScreen->numOverworldAreas = 1;
+            switch (gWildMonHeaders[i].mapGroup)
+            {
+            case MAP_GROUP_TOWNS_AND_ROUTES:
+                SetAreaHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
+                break;
+            case MAP_GROUP_DUNGEONS:
+            case MAP_GROUP_SPECIAL_AREA:
+                SetSpecialMapHasMon(gWildMonHeaders[i].mapGroup, gWildMonHeaders[i].mapNum);
+                break;
+            }
         }
-        else
+    }
+
+    // Add roamers to the area map
+    for (i = 0; i < ROAMER_COUNT; i++)
+    {
+        roamer = &gSaveBlock1Ptr->roamer[i];
+        if (species == roamer->species && roamer->active)
         {
-            sPokedexAreaScreen->numOverworldAreas = 0;
+            // This is a roamer's species, show where this roamer is currently
+            struct OverworldArea *roamerLocation = &sPokedexAreaScreen->overworldAreasWithMons[sPokedexAreaScreen->numOverworldAreas];
+            GetRoamerLocation(i, &roamerLocation->mapGroup, &roamerLocation->mapNum);
+            roamerLocation->regionMapSectionId = Overworld_GetMapHeaderByGroupAndId(roamerLocation->mapGroup, roamerLocation->mapNum)->regionMapSectionId;
+            sPokedexAreaScreen->numOverworldAreas++;
         }
     }
 }
@@ -638,6 +636,9 @@ static void Task_ShowPokedexAreaScreen(u8 taskId)
         BeginNormalPaletteFade(PALETTES_ALL & ~(0x14), 0, 16, 0, RGB_BLACK);
         break;
     case 10:
+        if (POKEDEX_PLUS_HGSS)
+            LoadHGSSScreenSelectBarSubmenu();
+
         SetGpuReg(REG_OFFSET_BLDCNT, BLDCNT_TGT1_BG0 | BLDCNT_EFFECT_BLEND | BLDCNT_TGT2_BG0 | BLDCNT_TGT2_ALL);
         StartAreaGlow();
         ShowBg(2);
@@ -669,10 +670,20 @@ static void Task_HandlePokedexAreaScreenInput(u8 taskId)
         if (JOY_NEW(B_BUTTON))
         {
             gTasks[taskId].data[1] = 1;
-            PlaySE(SE_PC_OFF);
+            PlaySE(SE_DEX_PAGE);
+        }
+        else if (JOY_NEW(DPAD_LEFT) || (JOY_NEW(L_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_LR))
+        {
+            gTasks[taskId].data[1] = 1;
+            PlaySE(SE_DEX_PAGE);
         }
         else if (JOY_NEW(DPAD_RIGHT) || (JOY_NEW(R_BUTTON) && gSaveBlock2Ptr->optionsButtonMode == OPTIONS_BUTTON_MODE_LR))
         {
+            if (!GetSetPokedexFlag(SpeciesToNationalPokedexNum(sPokedexAreaScreen->species), FLAG_GET_CAUGHT))
+            {
+                PlaySE(SE_FAILURE);
+                return;
+            }
             gTasks[taskId].data[1] = 2;
             PlaySE(SE_DEX_PAGE);
         }
@@ -707,11 +718,11 @@ static void ResetPokedexAreaMapBg(void)
 static void CreateAreaMarkerSprites(void)
 {
     u8 spriteId;
-    static s16 x;
-    static s16 y;
-    static s16 i;
-    static s16 mapSecId;
-    static s16 numSprites;
+    s16 x;
+    s16 y;
+    s16 i;
+    s16 mapSecId;
+    s16 numSprites;
 
     LoadSpriteSheet(&sAreaMarkerSpriteSheet);
     LoadSpritePalette(&sAreaMarkerSpritePalette);
@@ -794,4 +805,10 @@ static void CreateAreaUnknownSprites(void)
             }
         }
     }
+}
+
+static void LoadHGSSScreenSelectBarSubmenu(void)
+{
+    CopyToBgTilemapBuffer(1, sPokedexPlusHGSS_ScreenSelectBarSubmenu_Tilemap, 0, 0);
+    CopyBgTilemapBufferToVram(1);
 }

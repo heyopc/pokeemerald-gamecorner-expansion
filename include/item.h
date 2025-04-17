@@ -9,20 +9,24 @@ typedef void (*ItemUseFunc)(u8);
 
 struct Item
 {
+    u32 price;
+    u16 secondaryId;
+    ItemUseFunc fieldUseFunc;
+    const u8 *description;
+    const u8 *effect;
     u8 name[ITEM_NAME_LENGTH];
-    u16 itemId;
-    u16 price;
+    u8 pluralName[ITEM_NAME_PLURAL_LENGTH];
     u8 holdEffect;
     u8 holdEffectParam;
-    const u8 *description;
-    u8 importance;
-    bool8 registrability; // unused
+    u8 importance:2;
+    u8 notConsumed:1;
+    u8 padding:5;
     u8 pocket;
     u8 type;
-    ItemUseFunc fieldUseFunc;
     u8 battleUsage;
-    ItemUseFunc battleUseFunc;
-    u8 secondaryId;
+    u8 flingPower;
+    const u32 *iconPic;
+    const u32 *iconPalette;
 };
 
 struct BagPocket
@@ -31,19 +35,20 @@ struct BagPocket
     u8 capacity;
 };
 
-extern const struct Item gItems[];
+extern const struct Item gItemsInfo[];
 extern struct BagPocket gBagPockets[];
 
 void ApplyNewEncryptionKeyToBagItems(u32 newKey);
 void ApplyNewEncryptionKeyToBagItems_(u32 newKey);
 void SetBagItemsPointers(void);
-void CopyItemName(u16 itemId, u8 *dst);
-void CopyItemNameHandlePlural(u16 itemId, u8 *dst, u32 quantity);
-void GetBerryCountString(u8 *dst, const u8 *berryName, u32 quantity);
+u8 *CopyItemName(u16 itemId, u8 *dst);
+u8 *CopyItemNameHandlePlural(u16 itemId, u8 *dst, u32 quantity);
 bool8 IsBagPocketNonEmpty(u8 pocket);
 bool8 CheckBagHasItem(u16 itemId, u16 count);
 bool8 HasAtLeastOneBerry(void);
+bool8 HasAtLeastOnePokeBall(void);
 bool8 CheckBagHasSpace(u16 itemId, u16 count);
+u32 GetFreeSpaceForItemInBag(u16 itemId);
 bool8 AddBagItem(u16 itemId, u16 count);
 bool8 RemoveBagItem(u16 itemId, u16 count);
 u8 GetPocketByItemId(u16 itemId);
@@ -64,17 +69,21 @@ u16 CountTotalItemQuantityInBag(u16 itemId);
 bool8 AddPyramidBagItem(u16 itemId, u16 count);
 bool8 RemovePyramidBagItem(u16 itemId, u16 count);
 const u8 *ItemId_GetName(u16 itemId);
-u16 ItemId_GetPrice(u16 itemId);
-u8 ItemId_GetHoldEffect(u16 itemId);
-u8 ItemId_GetHoldEffectParam(u16 itemId);
+u32 ItemId_GetPrice(u16 itemId);
+const u8 *ItemId_GetEffect(u32 itemId);
+u32 ItemId_GetHoldEffect(u32 itemId);
+u32 ItemId_GetHoldEffectParam(u32 itemId);
 const u8 *ItemId_GetDescription(u16 itemId);
 u8 ItemId_GetImportance(u16 itemId);
+u8 ItemId_GetConsumability(u16 itemId);
 u8 ItemId_GetPocket(u16 itemId);
 u8 ItemId_GetType(u16 itemId);
 ItemUseFunc ItemId_GetFieldFunc(u16 itemId);
 u8 ItemId_GetBattleUsage(u16 itemId);
-ItemUseFunc ItemId_GetBattleFunc(u16 itemId);
-u8 ItemId_GetSecondaryId(u16 itemId);
+u32 ItemId_GetSecondaryId(u32 itemId);
+u32 ItemId_GetFlingPower(u32 itemId);
+u32 GetItemStatus1Mask(u16 itemId);
+u32 GetItemStatus2Mask(u16 itemId);
 
 /* Expands to:
  * enum

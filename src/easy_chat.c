@@ -17,6 +17,7 @@
 #include "main.h"
 #include "mystery_gift.h"
 #include "menu.h"
+#include "move.h"
 #include "overworld.h"
 #include "palette.h"
 #include "pokedex.h"
@@ -5204,10 +5205,10 @@ static const u8 *GetEasyChatWord(u8 groupId, u16 index)
     {
     case EC_GROUP_POKEMON:
     case EC_GROUP_POKEMON_NATIONAL:
-        return gSpeciesNames[index];
+        return GetSpeciesName(index);
     case EC_GROUP_MOVE_1:
     case EC_GROUP_MOVE_2:
-        return gMoveNames[index];
+        return GetMoveName(index);
     default:
         return gEasyChatGroups[groupId].wordData.words[index].text;
     }
@@ -5224,7 +5225,7 @@ u8 *CopyEasyChatWord(u8 *dest, u16 easyChatWord)
     {
         u16 index = EC_INDEX(easyChatWord);
         u8 groupId = EC_GROUP(easyChatWord);
-        resultStr = StringCopy(dest, GetEasyChatWord(groupId, index));
+        resultStr = StringCopyUppercase(dest, GetEasyChatWord(groupId, index));
     }
     else
     {
